@@ -1,6 +1,8 @@
 #pragma once
+#include <vector>
 
 #include "ImGuiWindow.h"
+#include "FileHandler.h"
 
 namespace App {
 
@@ -10,6 +12,7 @@ namespace App {
 namespace IGA {
 
 	void createControlWindow();
+
 	void fillTestVector();
 	void createFileView();
 

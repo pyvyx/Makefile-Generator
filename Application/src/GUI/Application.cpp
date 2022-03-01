@@ -9,8 +9,11 @@
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_stdlib.h"
 
+// GUI includes
 #include "Application.h"
 #include "ImGuiWindow.h"
+
+#include "FileHandler.h"
 
 
 namespace App {
@@ -178,9 +181,9 @@ namespace IGA {
 
     struct WidgetColor
     {
-        WidgetColor(int flag, const ImVec4* const color) 
+        constexpr WidgetColor(int flag, const ImVec4* const color) 
             : colorFlag(flag), color(color) {}
-        int colorFlag = 0;
+        const int colorFlag = 0;
         const ImVec4* const color;
     };
 
@@ -207,7 +210,7 @@ namespace IGA {
         static TextInput includeDirsInput("##IncludeDirs", "Add additional include directories");
 
         static Button selectLibraries("Select libraries");
-        static TextInput libraryInput("##Libraries", "Add additional libraries for linking");
+        static TextInput libraryInput("##Libraries", "Add additional libraries (already provide it for the linker)");
 
         static Button selectLibraryDirs("Select directories##SelectLibraryDirs");
         static TextInput libraryDirsInput("##LibraryDirs", "Add additional library directories");
@@ -215,29 +218,17 @@ namespace IGA {
         static Button selectFiles("Select files");
         static TextInput searchInput("##SearchFiles", "Search files");
         
-        static std::array<Button*, 4> buttons;
-        static std::array<TextInput*, 5> textInputs;
+        static std::array<Button*, 4> buttons = { &selectFiles, &selectLibraryDirs, &selectLibraries, &selectIncludeDirs };
+        static std::array<TextInput*, 5> textInputs = { &searchInput, &libraryDirsInput, &libraryInput, &includeDirsInput, &compilerFlagsInput };
 
         ImGui::SetNextWindowBgAlpha(1.f);
         if (IGW::sg_Window->hasResized())
-        {
-            buttons[0] = &selectFiles;
-            buttons[1] = &selectLibraryDirs;
-            buttons[2] = &selectLibraries;
-            buttons[3] = &selectIncludeDirs;
-
-            textInputs[0] = &searchInput;
-            textInputs[1] = &libraryDirsInput;
-            textInputs[2] = &libraryInput;
-            textInputs[3] = &includeDirsInput;
-            textInputs[4] = &compilerFlagsInput;
             resizeControlWindow(buttons, textInputs, compilerCombo);
-        }
 
         ImGui::Begin("ControlWindow", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
         static const ImVec4 darkerColor(0.27f, 0.27f, 0.27f, 1.0f);
         static const ImVec4 brighterColor(0.57f, 0.57f, 0.57f, 1.0f);
-        static const std::array<WidgetColor, 10> styleColors = {
+        static constexpr std::array<WidgetColor, 10> styleColors = {
             WidgetColor(ImGuiCol_Button,        &darkerColor),
             WidgetColor(ImGuiCol_ButtonHovered, &brighterColor),
             WidgetColor(ImGuiCol_ButtonActive,  &brighterColor),
@@ -251,6 +242,8 @@ namespace IGA {
         };
         pushStyleColor(styleColors);
 
+        if (compilerCombo.used())
+            std::cout << "Compiler combo selected: " << compilerCombo.selected << std::endl;
 
         if (compilerFlagsInput.used())
             std::cout << "Compiler flags: " << compilerFlagsInput.input << std::endl;
@@ -277,30 +270,19 @@ namespace IGA {
             std::cout << "file Pressed\n";
         
         if (searchInput.used())
-            std::cout << "Search input: " << searchInput.input << std::endl;
-
-        if (compilerCombo.used())
-            std::cout << "Compiler combo selected: " << compilerCombo.selected << std::endl;
+            FH::filterFileEntries(searchInput.input);
 
 
         popStyleColor(styleColors);
-
         ImGui::End();
     }
 
 
-    struct Bool {
-        Bool(bool elem) : elem(elem) {}
-        Bool& operator=(bool other) { elem = other; }
-        bool elem = false;
-    };
-
-    static std::vector<char> sg_SelectedFiles;
     #define MAX 1000
     void fillTestVector()
     {
         for (int i = 0; i < MAX; ++i)
-            sg_SelectedFiles.push_back(false);
+            FH::sg_FileEntries.push_back("File" + std::to_string(i));
     }
 
     void createFileView()
@@ -319,7 +301,7 @@ namespace IGA {
         static const ImVec4 darkerColor(0.27f, 0.27f, 0.27f, 1.0f);
         static const ImVec4 brighterColor(0.57f, 0.57f, 0.57f, 1.0f);
         static const ImVec4 whiteColot(1.f, 1.f, 1.f, 1.0f);
-        static const std::array<WidgetColor, 9> styleColors = {
+        static constexpr std::array<WidgetColor, 9> styleColors = {
             WidgetColor(ImGuiCol_FrameBg,           &darkerColor),
             WidgetColor(ImGuiCol_FrameBgHovered,    &brighterColor),
             WidgetColor(ImGuiCol_CheckMark,         &whiteColot),
@@ -332,39 +314,38 @@ namespace IGA {
         };
         pushStyleColor(styleColors);
 
+        if (ImGui::Button("Generate"))
+            std::cout << "Generate pressed\n";
 
         static bool selectAllChecked = false;
+        ImGui::SameLine(100.f);
         if (ImGui::Checkbox("Select all", &selectAllChecked))
         {
-            for (int i = 0; i < sg_SelectedFiles.size(); ++i)
-                sg_SelectedFiles[i] = selectAllChecked;
+            FH::setSelectAllEntries(selectAllChecked);
         }
 
-        static bool deletedAll = false;
-        if (selectAllChecked)
+        ImGui::SameLine(210.f);
+        if (ImGui::Button("Delete selected"))
+            FH::deleteSelectedEntries();
+
+        ImGui::SameLine(350.f);
+        if (ImGui::Button("undo"))
+            FH::undoLastDelete();
+
+        ImGui::Columns(1);
+        ImGui::Separator();
+
+
+        for (size_t i = 0; i < FH::sg_FileEntries.size(); ++i)
         {
-            ImGui::SameLine(130.f);
-            if (ImGui::Button("Delete all"))
-                deletedAll = true;
-
-            ImGui::SameLine(220.f);
-            if (ImGui::Button("undo"))
-                deletedAll = false;
-        }
-
-        if (!deletedAll)
-        {
-            ImGui::Columns(1);
-            ImGui::Separator();
-
-            for (int i = 0; i < sg_SelectedFiles.size(); ++i)
+            if (!FH::sg_FileEntries[i].isDeleted() && FH::sg_FileEntries[i].isShown())
             {
-                ImGui::Selectable(std::string("Select" + std::to_string(i)).c_str(), (bool*)&sg_SelectedFiles[i]);
+                ImGui::Selectable(FH::sg_FileEntries[i].fileName().c_str(), (bool*)&FH::sg_FileEntries[i].getSelectedRef());
                 ImGui::Separator();
             }
-
-            ImGui::Separator();
         }
+
+        ImGui::Separator();
 
         popStyleColor(styleColors);
         ImGui::End();
