@@ -69,6 +69,7 @@ namespace IGW {
         glfwSetFramebufferSizeCallback(m_Window, glfw_framebuffer_size_callback);
         glfwMakeContextCurrent(m_Window);
         glfwSwapInterval(1); // Enable vsync
+        glClearColor(0.27f, 0.27f, 0.27f, 1.0f);
     }
 
 
