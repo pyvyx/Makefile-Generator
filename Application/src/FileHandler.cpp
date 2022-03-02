@@ -5,7 +5,7 @@
 
 namespace FH {
 
-	std::vector<FileEntry> sg_FileEntries;
+	static std::vector<FileEntry> sg_FileEntries;
 
 	FileEntry::FileEntry()
 		: m_ID(sm_GlobalID), m_DeletedID(ID_NOT_DELETED), m_Deleted(false), m_Shown(true), m_Selected(false)
@@ -50,6 +50,12 @@ namespace FH {
 	std::string& FileEntry::fileName()			{ return m_FileName; }
 
 
+	FileEntryVec* getFileEntriesPtr()
+	{
+		return &sg_FileEntries;
+	}
+
+
 	int getDeletionID(bool last_one = false)
 	{
 		static int s_DeletionID = 0;
@@ -67,12 +73,11 @@ namespace FH {
 
 		for (size_t i = 0; i < sg_FileEntries.size(); ++i)
 		{
-			int entryDeletedID = sg_FileEntries[i].deletedID();
-
-			if (entryDeletedID == lastDeletionID)
+			if (sg_FileEntries[i].deletedID() == lastDeletionID)
+			{
 				sg_FileEntries[i].setDelete(false);
-			else if (entryDeletedID == ID_NOT_DELETED)
 				sg_FileEntries[i].setSelected(false);
+			}
 		}
 	}
 
@@ -90,6 +95,18 @@ namespace FH {
 		for (size_t i = 0; i < FH::sg_FileEntries.size(); ++i)
 			if(!FH::sg_FileEntries[i].isDeleted())
 				FH::sg_FileEntries[i].setSelected(state);
+	}
+
+	void addEntry(const std::string& str)
+	{
+		bool alreadyExists = false;
+		for (size_t i = 0; i < sg_FileEntries.size(); ++i)
+		{
+			if (sg_FileEntries[i].fileName().find(str) != std::string::npos)
+				alreadyExists = true;
+		}
+		if (!alreadyExists)
+			sg_FileEntries.push_back(str);
 	}
 
 	void filterFileEntries(std::string str)

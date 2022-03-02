@@ -1,4 +1,5 @@
 #include <iostream>
+#include <array>
 
 #include "GLFW/glfw3.h"
 
@@ -91,9 +92,23 @@ namespace IGW {
         window.vsync(true);
         window.imGuiInit(NULL);
 
-        Timer timer;
-        timer.start();
-        IGA::fillTestVector();
+        //IGA::fillTestVector();
+
+        // for styling
+        static const ImVec4 s_DarkerColor(0.27f, 0.27f, 0.27f, 1.0f);
+        static const ImVec4 s_BrighterColor(0.57f, 0.57f, 0.57f, 1.0f);
+        static const ImVec4 s_WhiteColor(1.f, 1.f, 1.f, 1.0f);
+        static constexpr std::array<IGA::WidgetColor, 9> styleColors = {
+            IGA::WidgetColor(ImGuiCol_FrameBg,           &s_DarkerColor),
+            IGA::WidgetColor(ImGuiCol_FrameBgHovered,    &s_BrighterColor),
+            IGA::WidgetColor(ImGuiCol_CheckMark,         &s_WhiteColor),
+            IGA::WidgetColor(ImGuiCol_Header,            &s_DarkerColor),
+            IGA::WidgetColor(ImGuiCol_HeaderActive,      &s_DarkerColor),
+            IGA::WidgetColor(ImGuiCol_HeaderHovered,     &s_BrighterColor),
+            IGA::WidgetColor(ImGuiCol_Button,            &s_DarkerColor),
+            IGA::WidgetColor(ImGuiCol_ButtonHovered,     &s_BrighterColor),
+            IGA::WidgetColor(ImGuiCol_ButtonActive,      &s_BrighterColor)
+        };
 
         // Main loop
         while (window.isOpen())
@@ -101,10 +116,11 @@ namespace IGW {
             window.clear();
             window.imGuiStartFrame();
 
-            //timer.measureFrameTime_FPS();
+            IGA::pushStyleColor(styleColors);
             IGA::createControlWindow();
+            IGA::createFileViewControl();
             IGA::createFileView();
-
+            IGA::popStyleColor(styleColors);
 
             //window.imGuiShowDemoWindow();
             window.imGuiRender();

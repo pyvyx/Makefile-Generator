@@ -35,11 +35,13 @@ namespace FH {
 		std::string& fileName();
 	};
 
-	extern std::vector<FileEntry> sg_FileEntries;
+	using FileEntryVec = std::vector<FileEntry>;
+	FileEntryVec* getFileEntriesPtr();
 
 	void undoLastDelete();
 	void deleteSelectedEntries();
 	void setSelectAllEntries(bool state);
+	void addEntry(const std::string& str);
 	void filterFileEntries(std::string str);
 }
 

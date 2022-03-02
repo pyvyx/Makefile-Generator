@@ -6,6 +6,7 @@
 #include <string>
 #include <array>
 
+#include "nfd/nfd.h"
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_stdlib.h"
 
@@ -28,6 +29,29 @@ namespace App {
 
 // using ImGui --------------------------------------------------------
 namespace IGA {
+
+    void handleFileDialog()
+    {
+        nfdpathset_t pathSet;
+        nfdresult_t result = NFD_OpenDialogMultiple("", NULL, &pathSet);
+        if (result == NFD_OKAY)
+        {
+            for (size_t i = 0; i < NFD_PathSet_GetCount(&pathSet); ++i)
+            {
+                nfdchar_t* path = NFD_PathSet_GetPath(&pathSet, i);
+                FH::addEntry(path);
+            }
+            NFD_PathSet_Free(&pathSet);
+        }
+        else if (result == NFD_CANCEL)
+        {
+            //puts("User pressed cancel.");
+        }
+        else
+        {
+            printf("Error opening file dialog: %s\n", NFD_GetError());
+        }
+    }
 
     #define X_OFFSET_BTN    ws.x - 170.f
     #define Y_OFFSET_BTN(x) ws.y - x
@@ -154,7 +178,7 @@ namespace IGA {
     template <size_t S, size_t S2>
     void resizeControlWindow(std::array<Button*, S>& buttons, std::array<TextInput*, S2>& textInputs, ComboBox& compilerCombo)
     {
-        static ImVec2 window_pos(0.f, 0.f);
+        static const ImVec2 window_pos(0.f, 0.f);
         std::pair<float, float> window_size = IGW::sg_Window->getSize();
         ImVec2 ws(window_size.first, window_size.second / 2.f);
         ImGui::SetNextWindowSize(ws);
@@ -179,31 +203,9 @@ namespace IGA {
 
     }
 
-    struct WidgetColor
-    {
-        constexpr WidgetColor(int flag, const ImVec4* const color) 
-            : colorFlag(flag), color(color) {}
-        const int colorFlag = 0;
-        const ImVec4* const color;
-    };
-
-    template<size_t S>
-    void pushStyleColor(const std::array<WidgetColor, S>& colorFlags)
-    {
-        for(size_t i = 0; i < colorFlags.size(); ++i)
-            ImGui::PushStyleColor(colorFlags[i].colorFlag, *colorFlags[i].color);
-    }
-
-    template<size_t S>
-    void popStyleColor(const std::array<WidgetColor, S>& colorFlags)
-    {
-        for (size_t i = 0; i < colorFlags.size(); ++i)
-            ImGui::PopStyleColor();
-    }
-
     void createControlWindow()
     {
-        static ComboBox compilerCombo("##CompilerCombo", "gcc\0clang\0g++\0clang++\0Other (Cf)");
+        static ComboBox compilerCombo("##CompilerCombo", "gcc\0g++\0clang\0clang++\0Other (Cf)");
         static TextInput compilerFlagsInput("##IncludeFlags", "Compiler flags");
 
         static Button selectIncludeDirs("Select directories##SelectIncludeDirs");
@@ -226,21 +228,6 @@ namespace IGA {
             resizeControlWindow(buttons, textInputs, compilerCombo);
 
         ImGui::Begin("ControlWindow", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
-        static const ImVec4 darkerColor(0.27f, 0.27f, 0.27f, 1.0f);
-        static const ImVec4 brighterColor(0.57f, 0.57f, 0.57f, 1.0f);
-        static constexpr std::array<WidgetColor, 10> styleColors = {
-            WidgetColor(ImGuiCol_Button,        &darkerColor),
-            WidgetColor(ImGuiCol_ButtonHovered, &brighterColor),
-            WidgetColor(ImGuiCol_ButtonActive,  &brighterColor),
-            WidgetColor(ImGuiCol_FrameBg,       &darkerColor),
-            WidgetColor(ImGuiCol_FrameBgHovered,&brighterColor),
-            WidgetColor(ImGuiCol_TextSelectedBg,&brighterColor),
-            WidgetColor(ImGuiCol_Header,        &brighterColor),
-            WidgetColor(ImGuiCol_HeaderHovered, &brighterColor),
-            WidgetColor(ImGuiCol_HeaderActive,  &brighterColor),
-            WidgetColor(ImGuiCol_Tab,           &brighterColor)
-        };
-        pushStyleColor(styleColors);
 
         if (compilerCombo.used())
             std::cout << "Compiler combo selected: " << compilerCombo.selected << std::endl;
@@ -266,14 +253,50 @@ namespace IGA {
         if(libraryDirsInput.used())
             std::cout << "Library Dirs: " << libraryDirsInput.input << std::endl;
         
-        if(selectFiles.used())
+        if (selectFiles.used())
+        {
             std::cout << "file Pressed\n";
+            handleFileDialog();
+        }
         
         if (searchInput.used())
             FH::filterFileEntries(searchInput.input);
 
 
-        popStyleColor(styleColors);
+        ImGui::End();
+    }
+
+
+    void createFileViewControl()
+    {
+        ImGui::SetNextWindowBgAlpha(1.f);
+        if (IGW::sg_Window->hasResized())
+        {
+            std::pair<float, float> window_size = IGW::sg_Window->getSize();
+            ImVec2 ws(window_size.first,  45.f);
+            ImGui::SetNextWindowSize(ws);
+            ImGui::SetNextWindowPos({ 0.f, (window_size.second / 2.f) });
+        }
+
+        ImGui::Begin("FileViewControl", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
+        if (ImGui::Button("Generate"))
+            std::cout << "Generate pressed\n";
+        
+        static bool selectAllChecked = false;
+        ImGui::SameLine(100.f);
+        if (ImGui::Checkbox("Select all", &selectAllChecked))
+        {
+            FH::setSelectAllEntries(selectAllChecked);
+        }
+        
+        ImGui::SameLine(210.f);
+        if (ImGui::Button("Delete selected"))
+            FH::deleteSelectedEntries();
+        
+        ImGui::SameLine(350.f);
+        if (ImGui::Button("undo"))
+            FH::undoLastDelete();
+
         ImGui::End();
     }
 
@@ -281,8 +304,9 @@ namespace IGA {
     #define MAX 1000
     void fillTestVector()
     {
+        static FH::FileEntryVec* entries = FH::getFileEntriesPtr();
         for (int i = 0; i < MAX; ++i)
-            FH::sg_FileEntries.push_back("File" + std::to_string(i));
+            entries->push_back("File" + std::to_string(i));
     }
 
     void createFileView()
@@ -292,62 +316,27 @@ namespace IGA {
         {
             std::pair<float, float> window_size = IGW::sg_Window->getSize();
             IGW::sg_Window->resized(false);
-            ImVec2 ws(window_size.first, window_size.second / 2.f);
+            ImVec2 ws(window_size.first, window_size.second / 2.f - 45);
             ImGui::SetNextWindowSize(ws);
-            ImGui::SetNextWindowPos({ 0.f, ws.y });
+            ImGui::SetNextWindowPos({ 0.f, ws.y + 90.f });
         }
+        static FH::FileEntryVec* fileEntries = FH::getFileEntriesPtr();
 
-        ImGui::Begin("FileViewer", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
-        static const ImVec4 darkerColor(0.27f, 0.27f, 0.27f, 1.0f);
-        static const ImVec4 brighterColor(0.57f, 0.57f, 0.57f, 1.0f);
-        static const ImVec4 whiteColot(1.f, 1.f, 1.f, 1.0f);
-        static constexpr std::array<WidgetColor, 9> styleColors = {
-            WidgetColor(ImGuiCol_FrameBg,           &darkerColor),
-            WidgetColor(ImGuiCol_FrameBgHovered,    &brighterColor),
-            WidgetColor(ImGuiCol_CheckMark,         &whiteColot),
-            WidgetColor(ImGuiCol_Header,            &darkerColor),
-            WidgetColor(ImGuiCol_HeaderActive,      &darkerColor),
-            WidgetColor(ImGuiCol_HeaderHovered,     &brighterColor),
-            WidgetColor(ImGuiCol_Button,            &darkerColor),
-            WidgetColor(ImGuiCol_ButtonHovered,     &brighterColor),
-            WidgetColor(ImGuiCol_ButtonActive,      &brighterColor)
-        };
-        pushStyleColor(styleColors);
-
-        if (ImGui::Button("Generate"))
-            std::cout << "Generate pressed\n";
-
-        static bool selectAllChecked = false;
-        ImGui::SameLine(100.f);
-        if (ImGui::Checkbox("Select all", &selectAllChecked))
-        {
-            FH::setSelectAllEntries(selectAllChecked);
-        }
-
-        ImGui::SameLine(210.f);
-        if (ImGui::Button("Delete selected"))
-            FH::deleteSelectedEntries();
-
-        ImGui::SameLine(350.f);
-        if (ImGui::Button("undo"))
-            FH::undoLastDelete();
-
+        ImGui::Begin("FileView", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
         ImGui::Columns(1);
         ImGui::Separator();
+        
 
-
-        for (size_t i = 0; i < FH::sg_FileEntries.size(); ++i)
+        for (size_t i = 0; i < fileEntries->size(); ++i)
         {
-            if (!FH::sg_FileEntries[i].isDeleted() && FH::sg_FileEntries[i].isShown())
+            if (!fileEntries->at(i).isDeleted() && fileEntries->at(i).isShown())
             {
-                ImGui::Selectable(FH::sg_FileEntries[i].fileName().c_str(), (bool*)&FH::sg_FileEntries[i].getSelectedRef());
+                ImGui::Selectable(fileEntries->at(i).fileName().c_str(), (bool*)&fileEntries->at(i).getSelectedRef());
                 ImGui::Separator();
             }
         }
 
         ImGui::Separator();
-
-        popStyleColor(styleColors);
         ImGui::End();
     }
 }
