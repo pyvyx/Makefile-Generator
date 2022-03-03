@@ -35,7 +35,6 @@ namespace FH {
 		{
 			m_DeletedID = ID_NOT_DELETED;
 			m_Deleted = false;
-			setSelected(true);
 		}
 	}
 	void FileEntry::setSelected(bool selected)	{ m_Selected  = selected; }
@@ -67,7 +66,7 @@ namespace FH {
 		return --s_DeletionID;
 	}
 
-	void undoLastDelete()
+	void undoLastDelete(bool selectAllChecked)
 	{
 		int lastDeletionID = getDeletionID(true);
 
@@ -76,7 +75,7 @@ namespace FH {
 			if (sg_FileEntries[i].deletedID() == lastDeletionID)
 			{
 				sg_FileEntries[i].setDelete(false);
-				sg_FileEntries[i].setSelected(false);
+				sg_FileEntries[i].setSelected(selectAllChecked);
 			}
 		}
 	}
@@ -99,14 +98,19 @@ namespace FH {
 
 	void addEntry(const std::string& str)
 	{
-		bool alreadyExists = false;
 		for (size_t i = 0; i < sg_FileEntries.size(); ++i)
 		{
 			if (sg_FileEntries[i].fileName().find(str) != std::string::npos)
-				alreadyExists = true;
+			{
+				if (sg_FileEntries[i].isDeleted())
+				{
+					sg_FileEntries[i].setDelete(false);
+					sg_FileEntries[i].setSelected(false);
+				}
+				return;
+			}
 		}
-		if (!alreadyExists)
-			sg_FileEntries.push_back(str);
+		sg_FileEntries.push_back(str);
 	}
 
 	void filterFileEntries(std::string str)

@@ -6,8 +6,7 @@
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 
-extern const unsigned int Arial_compressed_size;
-extern const unsigned int Arial_compressed_data[];
+#include "GUI/Arial.h"
 
 namespace IGW {
 

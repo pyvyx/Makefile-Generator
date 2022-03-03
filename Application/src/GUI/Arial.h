@@ -1,10 +1,8 @@
 // File: 'arial.ttf' (1036584 bytes)
 // Exported using binary_to_compressed_c.cpp
 
-#include "ImGuiWindow.h"
-
-const unsigned int Arial_compressed_size = 707161;
-const unsigned int Arial_compressed_data[707164/4] =
+static constexpr unsigned int Arial_compressed_size = 707161;
+static constexpr unsigned int Arial_compressed_data[707164/4] =
 {
     0x0000bc57, 0x00000000, 0x28d10f00, 0x00000400, 0x00010025, 0x82190000, 0x044e0804, 0x53449000, 0xd2a84749, 0x0d004c33, 0x0000b413, 0x4447b41d, 
     0x1e074645, 0x0d00c70a, 0x00006831, 0x50475203, 0x1132534f, 0x0d00c517, 0x0200bc34, 0x53471418, 0x84b24255, 0x0f00b86b, 0x0000d04c, 0x534ad883, 
@@ -14740,4 +14738,3 @@ const unsigned int Arial_compressed_data[707164/4] =
     0x82282008, 0x64022404, 0x82676e6c, 0x210b8307, 0x0b857316, 0x0f823e20, 0x72412237, 0x202c6e6d, 0x6c727943, 0x7247202c, 0x202c6b65, 0x6e74614c, 
     0x21578241, 0x1b91202c, 0x62654829, 0x4c202c72, 0x056e7461, 0x0c4717fa, 0x000000f9, 
 };
-
