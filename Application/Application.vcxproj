@@ -193,7 +193,8 @@
     <ClInclude Include="src\FileHandler.h" />
     <ClInclude Include="src\GUI\Application.h" />
     <ClInclude Include="src\GUI\ImGui\ImGuiWindow.h" />
-    <ClInclude Include="src\GUI\ImGui\Widgets\WidgetColor.h" />
+    <ClInclude Include="src\GUI\ImGui\Widgets\ImGuiSizeProperties.h" />
+    <ClInclude Include="src\GUI\ImGui\Widgets\ImGuiWidgetColor.h" />
     <ClInclude Include="src\Timer.h" />
     <ClInclude Include="vendor\stb\stb_image.h" />
   </ItemGroup>

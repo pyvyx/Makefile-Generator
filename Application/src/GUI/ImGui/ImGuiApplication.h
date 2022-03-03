@@ -3,7 +3,7 @@
 
 #include "ImGui/imgui.h"
 
-#include "GUI/ImGui/Widgets/WidgetColor.h"
+#include "GUI/ImGui/Widgets/ImGuiWidgetColor.h"
 
 namespace IGA {
 
@@ -21,6 +21,7 @@ namespace IGA {
             ImGui::PopStyleColor();
     }
 
+    void startApplication();
     void createControlWindow();
     void createFileViewControl();
     void fillTestVector();

@@ -2,15 +2,6 @@
 
 #include "ImGui/imgui.h"
 
-#define X_OFFSET_BTN    ws.x - 170.f
-#define Y_OFFSET_BTN(x) ws.y - x
-
-#define X_SIZE_BTN      150.f
-#define Y_SIZE_BTN      40.f
-
-#define X_POS_TXT_IP    10.f
-#define X_SIZE_TXT_IP   ws.x - 200.f
-#define Y_OFF_TXT_IP(x) ws.y - x
 
 namespace IGWidget {
 
@@ -26,8 +17,8 @@ namespace IGWidget {
         ComboBox();
         ComboBox(const char* label, const char* items);
 
-        bool used(const char* label_p, const char* items_p);
-        bool used();
+        bool Selected(const char* label_p, const char* items_p);
+        bool Selected();
         void resetPosSize(const ImVec2& ws, float y_offset);
     };
 

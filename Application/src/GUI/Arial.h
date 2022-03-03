@@ -1,8 +1,8 @@
 // File: 'arial.ttf' (1036584 bytes)
 // Exported using binary_to_compressed_c.cpp
 
-static constexpr unsigned int Arial_compressed_size = 707161;
-static constexpr unsigned int Arial_compressed_data[707164/4] =
+static constexpr unsigned int sg_ArialCompressedSize = 707161;
+static constexpr unsigned int sg_ArialCompressedData[707164/4] =
 {
     0x0000bc57, 0x00000000, 0x28d10f00, 0x00000400, 0x00010025, 0x82190000, 0x044e0804, 0x53449000, 0xd2a84749, 0x0d004c33, 0x0000b413, 0x4447b41d, 
     0x1e074645, 0x0d00c70a, 0x00006831, 0x50475203, 0x1132534f, 0x0d00c517, 0x0200bc34, 0x53471418, 0x84b24255, 0x0f00b86b, 0x0000d04c, 0x534ad883, 

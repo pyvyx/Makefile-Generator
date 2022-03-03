@@ -1,54 +1,27 @@
 #include <iostream>
-#include <array>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
 #include "GLFW/glfw3.h"
-#include "ImGui/imgui.h"
+#include "stb/stb_image.h"
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 
 #include "GUI/ImGui/ImGuiWindow.h"
 #include "GUI/ImGui/ImGuiApplication.h"
 #include "GUI/Icon.h"
+#include "GUI/Arial.h"
+
 
 namespace IGW {
 
-    Window* sg_Window = nullptr;
+    Window* g_Window = nullptr;
     static char sg_WindowEventHappened = 0;
-
-    void glfw_error_callback(int error, const char* description)
-    {
-        fprintf(stderr, "Glfw Error %d: %s\n", error, description);
-    }
-
-    void glfw_framebuffer_size_callback(GLFWwindow* window, int width, int height)
-    {
-        glViewport(0, 0, width, height);
-        sg_Window->resized(true);
-        sg_WindowEventHappened = 2;
-    }
-
-    void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-    {
-        sg_WindowEventHappened = 2;
-    }
-
-    void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
-    {
-        sg_WindowEventHappened = 2;
-    }
-
-    void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-    {
-        sg_WindowEventHappened = 2;
-    }
 
     //public
     Window::Window(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share)
         : m_Window(nullptr)
     {
-        glfwSetErrorCallback(glfw_error_callback);
+        glfwSetErrorCallback([](int error, const char* description){ fprintf(stderr, "Glfw Error %d: %s\n", error, description); });
         
         if (!glfwInit())
         {
@@ -75,13 +48,13 @@ namespace IGW {
         stbi_image_free(icon_s.pixels);
 
         // set window pointer and callbacks
-        sg_Window = this;
-        glfwSetMouseButtonCallback(m_Window, mouse_button_callback);
-        glfwSetKeyCallback(m_Window, key_callback);
-        glfwSetCursorPosCallback(m_Window, cursor_position_callback);
-        glfwSetFramebufferSizeCallback(m_Window, glfw_framebuffer_size_callback);
+        g_Window = this;
+        glfwSetCursorPosCallback      (m_Window, [](GLFWwindow* window, double xpos, double ypos)                        { sg_WindowEventHappened = 2; });
+        glfwSetMouseButtonCallback    (m_Window, [](GLFWwindow* window, int button,  int action,   int mods)             { sg_WindowEventHappened = 2; });
+        glfwSetKeyCallback            (m_Window, [](GLFWwindow* window, int key,     int scancode, int action, int mods) { sg_WindowEventHappened = 2; });
+        glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width,   int height ) { glViewport(0, 0, width, height); g_Window->resized(true); sg_WindowEventHappened = 2; });
+        
         glfwMakeContextCurrent(m_Window);
-
         glfwSwapInterval(1); // Enable vsync
         glClearColor(0.27f, 0.27f, 0.27f, 1.0f);
     }
@@ -99,29 +72,65 @@ namespace IGW {
     }
 
 
-    void runWindow()
+    std::pair<float, float> Window::getSize() const
+    {
+        int width, height;
+        glfwGetWindowSize(m_Window, &width, &height);
+        return { static_cast<float>(width), static_cast<float>(height) };
+    }
+
+
+    void Window::imGuiInit(const char* iniFileName) const
+    {
+        ImGui::CreateContext();
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.Fonts->AddFontFromMemoryCompressedTTF(sg_ArialCompressedData, sg_ArialCompressedSize, 19);
+        //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        io.IniFilename = iniFileName;
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.FrameRounding = 5.f;
+
+        ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+        ImGui_ImplOpenGL3_Init("#version 130");
+        ImGui::StyleColorsDark();
+    }
+
+
+    void Window::imGuiStartFrame() const
+    {
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
+
+
+    void Window::imGuiRender() const
+    {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // for multiple viewports
+        //ImGuiIO& io = ImGui::GetIO();
+        //if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        //{
+        //	GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        //	ImGui::UpdatePlatformWindows();
+        //	ImGui::RenderPlatformWindowsDefault();
+        //	glfwMakeContextCurrent(backup_current_context);
+        //}
+    }
+
+
+    void startWindow()
     {
         IGW::Window window;
-        window.vsync(true);
         window.imGuiInit(NULL);
 
         //IGA::fillTestVector();
-
-        // for styling
-        static const ImVec4 s_DarkerColor(0.27f, 0.27f, 0.27f, 1.0f);
-        static const ImVec4 s_BrighterColor(0.57f, 0.57f, 0.57f, 1.0f);
-        static const ImVec4 s_WhiteColor(1.f, 1.f, 1.f, 1.0f);
-        static constexpr std::array<IGWidget::WidgetColor, 9> styleColors = {
-            IGWidget::WidgetColor(ImGuiCol_FrameBg,           &s_DarkerColor),
-            IGWidget::WidgetColor(ImGuiCol_FrameBgHovered,    &s_BrighterColor),
-            IGWidget::WidgetColor(ImGuiCol_CheckMark,         &s_WhiteColor),
-            IGWidget::WidgetColor(ImGuiCol_Header,            &s_DarkerColor),
-            IGWidget::WidgetColor(ImGuiCol_HeaderActive,      &s_DarkerColor),
-            IGWidget::WidgetColor(ImGuiCol_HeaderHovered,     &s_BrighterColor),
-            IGWidget::WidgetColor(ImGuiCol_Button,            &s_DarkerColor),
-            IGWidget::WidgetColor(ImGuiCol_ButtonHovered,     &s_BrighterColor),
-            IGWidget::WidgetColor(ImGuiCol_ButtonActive,      &s_BrighterColor)
-        };
 
         // Main loop
         while (window.isOpen())
@@ -129,13 +138,9 @@ namespace IGW {
             window.clear();
             window.imGuiStartFrame();
 
-            IGA::pushStyleColor(styleColors);
-            IGA::createControlWindow();
-            IGA::createFileViewControl();
-            IGA::createFileView();
-            IGA::popStyleColor(styleColors);
+            IGA::startApplication();
 
-            //window.imGuiShowDemoWindow();
+            //ImGui::ShowDemoWindow();
             window.imGuiRender();
             if (sg_WindowEventHappened) {
                 window.pollEvents();

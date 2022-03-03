@@ -36,7 +36,7 @@ namespace FH {
 	};
 
 	using FileEntryVec = std::vector<FileEntry>;
-	FileEntryVec* getFileEntriesPtr();
+	FileEntryVec& getFileEntriesRef();
 
 	void undoLastDelete(bool selectAllChecked);
 	void deleteSelectedEntries();

@@ -49,9 +49,9 @@ namespace FH {
 	std::string& FileEntry::fileName()			{ return m_FileName; }
 
 
-	FileEntryVec* getFileEntriesPtr()
+	FileEntryVec& getFileEntriesRef()
 	{
-		return &sg_FileEntries;
+		return sg_FileEntries;
 	}
 
 

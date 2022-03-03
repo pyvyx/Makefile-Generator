@@ -1,20 +1,21 @@
 #include "ImGui/imgui.h"
 
 #include "ImGuiComboBox.h"
+#include "GUI/ImGui/Widgets/ImGuiSizeProperties.h"
 
 namespace IGWidget {
 
     ComboBox::ComboBox() : label(""), items("") {}
     ComboBox::ComboBox(const char* label, const char* items) : label(label), items(items) {}
 
-    bool ComboBox::used(const char* label_p, const char* items_p)
+    bool ComboBox::Selected(const char* label_p, const char* items_p)
     {
         ImGui::SetCursorPos(pos);
         ImGui::PushItemWidth(length);
         return ImGui::Combo(label_p, &selected, items_p);
     }
 
-    bool ComboBox::used()
+    bool ComboBox::Selected()
     {
         ImGui::SetCursorPos(pos);
         ImGui::PushItemWidth(length);
@@ -24,11 +25,11 @@ namespace IGWidget {
     void ComboBox::resetPosSize(const ImVec2& ws, float y_offset)
     {
         // set combo box pos
-        pos.x = X_OFFSET_BTN;
-        pos.y = Y_OFFSET_BTN(y_offset);
+        pos.x = IGWidget_BTN_OFFSET_X(ws.x);
+        pos.y = IGWidget_BTN_OFFSET_Y(ws.y, y_offset);
 
         // set combo box size
-        length = X_SIZE_BTN;
+        length = sg_ButtonSize.x;
     }
 
 }

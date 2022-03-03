@@ -2,5 +2,5 @@
 
 int main()
 {
-	App::runApplication();
+	App::startApplication();
 }
