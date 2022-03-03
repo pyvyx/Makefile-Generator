@@ -21,9 +21,20 @@ namespace IGA {
             ImGui::PopStyleColor();
     }
 
+    struct ControlWindowInfo
+    {
+        int* selectedCompiler = 0;
+        std::string* compilerFlags;
+        std::string* linkLibraries;
+        std::string* makeFileOutput;
+        std::string* outputDir;
+        std::string* includeDirs;
+        std::string* libraryDirs;
+    };
+
     void startApplication();
-    void createControlWindow();
-    void createFileViewControl();
+    void createControlWindow(ControlWindowInfo* cwi);
+    void createFileViewControl(ControlWindowInfo* cwi);
     void fillTestVector();
     void createFileView();
 

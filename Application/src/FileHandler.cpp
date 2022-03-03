@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <filesystem>
 
 #include "FileHandler.h"
 
@@ -135,5 +136,10 @@ namespace FH {
 			else
 				sg_FileEntries[i].setShown(true);
 		}
+	}
+
+	std::string getRelativePath(const std::string& base_str, const std::string& p)
+	{
+		return std::filesystem::relative(p, base_str).generic_string();
 	}
 }

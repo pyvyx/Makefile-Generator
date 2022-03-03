@@ -43,6 +43,7 @@ namespace FH {
 	void setSelectAllEntries(bool state);
 	void addEntry(const std::string& str);
 	void filterFileEntries(std::string str);
+	std::string getRelativePath(const std::string& base_str, const std::string& p);
 }
 
 

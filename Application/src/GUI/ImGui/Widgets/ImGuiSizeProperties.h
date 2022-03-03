@@ -7,8 +7,9 @@ namespace IGWidget {
 		constexpr ButtonSize(float x, float y) : x(x), y(y) {}
 		const float x, y;
 	};
-	static constexpr ButtonSize sg_ButtonSize(150.f, 40.f);
+	static constexpr ButtonSize sg_ButtonSize(150.f, 35.f);
 	static constexpr float sg_XPosTextInput = 10.f;
+	static constexpr float sg_TextInputYOffset = 5.f;
 
 	#define IGWidget_BTN_OFFSET_X(x)           x - 170.f
 	#define IGWidget_BTN_OFFSET_Y(x, y)        x - y
