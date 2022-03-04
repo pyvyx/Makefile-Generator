@@ -1,6 +1,7 @@
 #include <vector>
 #include <sstream>
-#include <set>
+#include <unordered_set>
+#include <fstream>
 
 #include "Generator.h"
 #include "FileHandler.h"
@@ -60,15 +61,17 @@ namespace MG {
 		return target;
 	}
 
-	std::string createFiles(FH::FileEntryVec& vec)
+	std::pair<std::string, std::string> createFileVariables(FH::FileEntryVec& vec, const std::string& outputDir)
 	{
-		std::string result;
+		std::string result = "SOURCE_FILES=";
 		for (size_t i = 0; i < vec.size(); ++i)
 		{
 			if (!vec[i].isDeleted())
-				result += "File" + std::to_string(i) + "=" + vec[i].fileName() + "\n";
+				result += vec[i].fileName() + " ";
 		}
-		return result;
+
+		std::string resultOBJ = "OBJ_FILES=$(addprefix " + outputDir + "/, $(notdir $(SOURCE_FILES:.cpp=.o)))";
+		return {result, resultOBJ};
 	}
 
 	std::string getDirName(const std::string& fname)
@@ -77,25 +80,57 @@ namespace MG {
 		return (std::string::npos == pos) ? "" : fname.substr(0, pos);
 	}
 
-	std::set<std::string> getAllSourceDirectories(FH::FileEntryVec& vec)
+	std::unordered_set<std::string> getAllSourceDirectories(FH::FileEntryVec& vec)
 	{
-		std::set<std::string> sourceDirs;
+		std::unordered_set<std::string> sourceDirs;
 		for (size_t i = 0; i < vec.size(); ++i)
 		{
 			if (!vec[i].isDeleted())
-				sourceDirs.insert(getDirName(vec[i].fileName()));
+			{
+				std::string dirName = getDirName(vec[i].fileName());
+				if(dirName.size() > 0)
+					sourceDirs.insert(dirName + "/");
+				else
+					sourceDirs.insert("");
+			}
 		}
 		return sourceDirs;
 	}
 
 	void GenerateMakeFile(GeneratorInfo info)
 	{
+		if (info.outputDir == "")
+			info.outputDir = "out";
+
 		std::string compiler = getCompiler(info.selectedCompiler);
 		std::string includeDirectories = createDirectoryPaths(info.includeDirs, "I");
 		std::string libraryDirectories = createDirectoryPaths(info.includeDirs, "L");
-		std::set<std::string> sourceDirs = getAllSourceDirectories(info.files);
 
-		std::cout << generateTarget(info.outputDir + "/" + "%.o", *sourceDirs.begin() + "%.cpp", "\ttest");
+		std::string buildObjFilesCommand = compiler + " " + info.compilerFlags + " -c $< -o $@ " + includeDirectories;
+		std::string sourceFiles = createFileVariables(info.files, info.outputDir).first;
+		std::string objectFiles = createFileVariables(info.files, info.outputDir).second;
+
+		std::unordered_set<std::string> sourceDirs = getAllSourceDirectories(info.files);
+
+		std::string objectTargets;
+		for (const auto& i : sourceDirs)
+			objectTargets += generateTarget("out/%.o", i + "%.c", "\t" + buildObjFilesCommand + "\n\n");
+			//objectTargets += generateTarget("out/%.o", i + "%.c", "\tgcc -D _GLFW_WIN32 -c $< -o $@ " + includeDirectories + "\n\n");
+
+		std::cout << objectTargets << std::endl;
+		std::string buildTarget = generateTarget("Build", "$(OBJ_FILES)", "");
+
+		std::ofstream makeFile(info.makeFileOutput + "/makefile");
+		
+		makeFile << sourceFiles << '\n';
+		makeFile << objectFiles << '\n';
+		makeFile << buildTarget << '\n';
+		makeFile << objectTargets << '\n';
+		
+		makeFile.close();
+
+		//std::unordered_set<std::string> sourceDirs = getAllSourceDirectories(info.files);
+		//std::cout << generateTarget(info.outputDir + "/" + "%.o", *sourceDirs.begin() + "%.cpp", "\ttest");
 	}
 
 }
