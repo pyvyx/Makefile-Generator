@@ -1,0 +1,2 @@
+add compiler options gcc/g++ && clang/clang++:
+	when selected use gcc/clang for c files and g++ and clang++ for c++ files

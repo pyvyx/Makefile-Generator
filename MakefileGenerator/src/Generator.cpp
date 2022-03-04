@@ -169,7 +169,7 @@ namespace MG {
 
 			for (auto& j : vec)
 			{
-				if (j.extension() == i)
+				if (j.extension() == i && !j.isDeleted())
 					sourceFiles += j.fileName() + " ";
 			}
 
