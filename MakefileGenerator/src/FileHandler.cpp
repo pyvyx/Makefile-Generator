@@ -1,5 +1,7 @@
 #include <iostream>
 #include <algorithm>
+#include <filesystem>
+#include <unordered_set>
 
 #include "FileHandler.h"
 
@@ -13,8 +15,8 @@ namespace FH {
 		++sm_GlobalID;
 	}
 
-	FileEntry::FileEntry(const std::string& str)
-		: m_ID(sm_GlobalID), m_DeletedID(ID_NOT_DELETED), m_Deleted(false), m_Shown(true), m_Selected(false), m_FileName(str)
+	FileEntry::FileEntry(const std::string& str, const std::string& ext)
+		: m_ID(sm_GlobalID), m_DeletedID(ID_NOT_DELETED), m_Deleted(false), m_Shown(true), m_Selected(false), m_FileName(str), m_FileExtension(ext)
 	{
 		++sm_GlobalID;
 	}
@@ -35,24 +37,25 @@ namespace FH {
 		{
 			m_DeletedID = ID_NOT_DELETED;
 			m_Deleted = false;
-			setSelected(true);
 		}
 	}
 	void FileEntry::setSelected(bool selected)	{ m_Selected  = selected; }
 	void FileEntry::setShown(bool shown)		{ m_Shown     = shown;    }
+	void FileEntry::setFileExtension(const std::string& str) { m_FileExtension = str; }
 
-	bool& FileEntry::getSelectedRef()			{ return m_Selected; }
-	bool FileEntry::isSelected()				{ return m_Selected; }
-	bool FileEntry::isShown()					{ return m_Shown;    }
-	bool FileEntry::isDeleted()					{ return m_Deleted;  }
-	int  FileEntry::ID()						{ return m_ID;		 }
-	int  FileEntry::deletedID()					{ return m_DeletedID;}
-	std::string& FileEntry::fileName()			{ return m_FileName; }
+	bool& FileEntry::getSelectedRef()			{ return m_Selected;      }
+	bool FileEntry::isSelected()				{ return m_Selected;      }
+	bool FileEntry::isShown()					{ return m_Shown;         }
+	bool FileEntry::isDeleted()					{ return m_Deleted;       }
+	int  FileEntry::ID()						{ return m_ID;		      }
+	int  FileEntry::deletedID()					{ return m_DeletedID;     }
+	std::string& FileEntry::fileName()			{ return m_FileName;      }
+	std::string& FileEntry::extension()			{ return m_FileExtension; }
 
 
-	FileEntryVec* getFileEntriesPtr()
+	FileEntryVec& getFileEntriesRef()
 	{
-		return &sg_FileEntries;
+		return sg_FileEntries;
 	}
 
 
@@ -67,7 +70,7 @@ namespace FH {
 		return --s_DeletionID;
 	}
 
-	void undoLastDelete()
+	void undoLastDelete(bool selectAllChecked)
 	{
 		int lastDeletionID = getDeletionID(true);
 
@@ -76,7 +79,7 @@ namespace FH {
 			if (sg_FileEntries[i].deletedID() == lastDeletionID)
 			{
 				sg_FileEntries[i].setDelete(false);
-				sg_FileEntries[i].setSelected(false);
+				sg_FileEntries[i].setSelected(selectAllChecked);
 			}
 		}
 	}
@@ -99,14 +102,28 @@ namespace FH {
 
 	void addEntry(const std::string& str)
 	{
-		bool alreadyExists = false;
 		for (size_t i = 0; i < sg_FileEntries.size(); ++i)
 		{
 			if (sg_FileEntries[i].fileName().find(str) != std::string::npos)
-				alreadyExists = true;
+			{
+				if (sg_FileEntries[i].isDeleted())
+				{
+					sg_FileEntries[i].setDelete(false);
+					sg_FileEntries[i].setSelected(false);
+				}
+				return;
+			}
 		}
-		if (!alreadyExists)
-			sg_FileEntries.push_back(str);
+
+		auto lowerCaseString = [=](std::string str) {
+			std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+			return str;
+		};
+
+		std::string extension = std::filesystem::path(str).extension().generic_string();
+		std::string lowerCased = lowerCaseString(extension);
+		if (lowerCased == ".cpp" || lowerCased == ".cc" || lowerCased == ".cxx" || lowerCased == ".c++" || lowerCased == ".cp" || extension == ".C" || lowerCased == ".c")
+			sg_FileEntries.push_back({ str, extension });
 	}
 
 	void filterFileEntries(std::string str)
@@ -131,5 +148,12 @@ namespace FH {
 			else
 				sg_FileEntries[i].setShown(true);
 		}
+	}
+
+	std::string getRelativePath(const std::string& base_str, const std::string& p)
+	{
+		std::filesystem::path base(base_str);
+		std::filesystem::path p2(p);
+		return std::filesystem::relative(p2, base).generic_string();
 	}
 }
