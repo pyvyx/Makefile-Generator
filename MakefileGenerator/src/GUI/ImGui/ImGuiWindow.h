@@ -11,7 +11,7 @@ namespace IGW {
 		bool m_Resized = true;
 	public:
 		// 1280 720 / 700 650
-		Window(int width = 930, int height = 660, const char* title = "Makefile-Generator", GLFWmonitor* monitor = NULL, GLFWwindow* share = NULL);
+		Window(int width = 930, int height = 700, const char* title = "Makefile-Generator", GLFWmonitor* monitor = NULL, GLFWwindow* share = NULL);
 		~Window();
 
 		inline void vsync(bool state) const { glfwSwapInterval(state); }

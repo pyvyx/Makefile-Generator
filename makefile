@@ -1,10 +1,29 @@
-SOURCE_FILES=Dependencies/GLFW/src/context.c Dependencies/GLFW/src/egl_context.c Dependencies/GLFW/src/egl_context.h Dependencies/GLFW/src/init.c Dependencies/GLFW/src/input.c Dependencies/GLFW/src/internal.h Dependencies/GLFW/src/mappings.h Dependencies/GLFW/src/monitor.c Dependencies/GLFW/src/osmesa_context.c Dependencies/GLFW/src/osmesa_context.h Dependencies/GLFW/src/vulkan.c Dependencies/GLFW/src/wgl_context.c Dependencies/GLFW/src/wgl_context.h Dependencies/GLFW/src/win32_init.c Dependencies/GLFW/src/win32_joystick.c Dependencies/GLFW/src/win32_joystick.h Dependencies/GLFW/src/win32_monitor.c Dependencies/GLFW/src/win32_platform.h Dependencies/GLFW/src/win32_thread.c Dependencies/GLFW/src/win32_time.c Dependencies/GLFW/src/win32_window.c Dependencies/GLFW/src/window.c 
-OBJ_FILES=$(addprefix out/, $(notdir $(SOURCE_FILES:.c=.o)))
-Build: $(OBJ_FILES)
+CXXCOMP=g++
+CXXFLAGS=
+INCLUDEDIRS=-IDependencies/ImGui/include/ImGui/ -IDependencies/GLFW/include/ 
+LIBRARYDIRS=
+LIBRARIES=
+EXE=ImGui
+OUTPUTFOLDER=Builds
+INTFOLDER=Builds\BIN
 
-out/%.o: Dependencies/GLFW/src/%.c
-	clang -D _GLFW_WIN32 -Ofast -c $< -o $@ -IDependencies/GLFW/include -IDependencies/GLFW/include/GLFW 
+SRCFILEScpp=Dependencies/ImGui/src/imgui.cpp Dependencies/ImGui/src/imgui_demo.cpp Dependencies/ImGui/src/imgui_draw.cpp Dependencies/ImGui/src/imgui_impl_glfw.cpp Dependencies/ImGui/src/imgui_impl_opengl3.cpp Dependencies/ImGui/src/imgui_stdlib.cpp Dependencies/ImGui/src/imgui_tables.cpp Dependencies/ImGui/src/imgui_widgets.cpp 
+OBJFILEScpp=$(addprefix $(INTFOLDER)/, $(notdir $(SRCFILEScpp:.cpp=.o)))
+
+#Do not edit below this line
+Build: $(OUTPUTFOLDER) $(INTFOLDER) $(OUTPUTFOLDER)/$(EXE)
+
+$(OUTPUTFOLDER)/$(EXE): $(OBJFILEScpp) 
+	ar rcs $(OUTPUTFOLDER)/lib$(EXE).a $(OBJFILEScpp) 
+
+$(INTFOLDER)/%.o: Dependencies/ImGui/src/%.cpp
+	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS) $(LIBRARYDIRS) $(LIBRARIES)
 
 
-out/%.h:
-	$(info er)
+$(OUTPUTFOLDER): 
+	mkdir $(OUTPUTFOLDER)
+$(INTFOLDER): 
+	mkdir $(INTFOLDER)
+
+clean: 
+	rmdir /s /q $(OUTPUTFOLDER)

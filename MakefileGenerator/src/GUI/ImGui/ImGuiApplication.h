@@ -30,6 +30,7 @@ namespace IGA {
         std::string* outputDir;
         std::string* includeDirs;
         std::string* libraryDirs;
+        std::string* outFileName;
     };
 
     void startApplication();

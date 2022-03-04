@@ -18,13 +18,15 @@ namespace FH {
 		bool m_Shown;
 		bool m_Selected;
 		std::string m_FileName;
+		std::string m_FileExtension;
 	public:
 		FileEntry();
-		FileEntry(const std::string& str);
+		FileEntry(const std::string& str, const std::string& ext);
 		void setFileName(const std::string& str);
 		void setDelete(bool toDelete, int id = ID_NOT_DELETED);
 		void setSelected(bool selected);
 		void setShown(bool shown);
+		void setFileExtension(const std::string& str);
 
 		bool& getSelectedRef();
 		bool isSelected();
@@ -33,6 +35,7 @@ namespace FH {
 		int ID();
 		int deletedID();
 		std::string& fileName();
+		std::string& extension();
 	};
 
 	using FileEntryVec = std::vector<FileEntry>;

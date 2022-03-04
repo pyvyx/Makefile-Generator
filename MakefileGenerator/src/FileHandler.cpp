@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <filesystem>
+#include <unordered_set>
 
 #include "FileHandler.h"
 
@@ -14,8 +15,8 @@ namespace FH {
 		++sm_GlobalID;
 	}
 
-	FileEntry::FileEntry(const std::string& str)
-		: m_ID(sm_GlobalID), m_DeletedID(ID_NOT_DELETED), m_Deleted(false), m_Shown(true), m_Selected(false), m_FileName(str)
+	FileEntry::FileEntry(const std::string& str, const std::string& ext)
+		: m_ID(sm_GlobalID), m_DeletedID(ID_NOT_DELETED), m_Deleted(false), m_Shown(true), m_Selected(false), m_FileName(str), m_FileExtension(ext)
 	{
 		++sm_GlobalID;
 	}
@@ -40,14 +41,16 @@ namespace FH {
 	}
 	void FileEntry::setSelected(bool selected)	{ m_Selected  = selected; }
 	void FileEntry::setShown(bool shown)		{ m_Shown     = shown;    }
+	void FileEntry::setFileExtension(const std::string& str) { m_FileExtension = str; }
 
-	bool& FileEntry::getSelectedRef()			{ return m_Selected; }
-	bool FileEntry::isSelected()				{ return m_Selected; }
-	bool FileEntry::isShown()					{ return m_Shown;    }
-	bool FileEntry::isDeleted()					{ return m_Deleted;  }
-	int  FileEntry::ID()						{ return m_ID;		 }
-	int  FileEntry::deletedID()					{ return m_DeletedID;}
-	std::string& FileEntry::fileName()			{ return m_FileName; }
+	bool& FileEntry::getSelectedRef()			{ return m_Selected;      }
+	bool FileEntry::isSelected()				{ return m_Selected;      }
+	bool FileEntry::isShown()					{ return m_Shown;         }
+	bool FileEntry::isDeleted()					{ return m_Deleted;       }
+	int  FileEntry::ID()						{ return m_ID;		      }
+	int  FileEntry::deletedID()					{ return m_DeletedID;     }
+	std::string& FileEntry::fileName()			{ return m_FileName;      }
+	std::string& FileEntry::extension()			{ return m_FileExtension; }
 
 
 	FileEntryVec& getFileEntriesRef()
@@ -111,7 +114,16 @@ namespace FH {
 				return;
 			}
 		}
-		sg_FileEntries.push_back(str);
+
+		auto lowerCaseString = [=](std::string str) {
+			std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+			return str;
+		};
+
+		std::string extension = std::filesystem::path(str).extension().generic_string();
+		std::string lowerCased = lowerCaseString(extension);
+		if (lowerCased == ".cpp" || lowerCased == ".cc" || lowerCased == ".cxx" || lowerCased == ".c++" || lowerCased == ".cp" || extension == ".C" || lowerCased == ".c")
+			sg_FileEntries.push_back({ str, extension });
 	}
 
 	void filterFileEntries(std::string str)
@@ -140,6 +152,8 @@ namespace FH {
 
 	std::string getRelativePath(const std::string& base_str, const std::string& p)
 	{
-		return std::filesystem::relative(p, base_str).generic_string();
+		std::filesystem::path base(base_str);
+		std::filesystem::path p2(p);
+		return std::filesystem::relative(p2, base).generic_string();
 	}
 }

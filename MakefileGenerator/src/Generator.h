@@ -17,6 +17,7 @@ namespace MG {
         std::string libraryDirs;
         std::vector<FH::FileEntry> files;
         int selectedBinaryFormat = 0;
+        std::string outFileName;
 
         void print()
         {
@@ -30,6 +31,13 @@ namespace MG {
             std::cout << "Selected bin form: " << selectedBinaryFormat << std::endl;
             std::cout << "Files            : " << files.size() << std::endl;
         }
+    };
+
+    enum BuildModes : int
+    {
+        Application,
+        StaticLibrary,
+        DynamicLibrary
     };
 
     void GenerateMakeFile(GeneratorInfo info);

@@ -44,8 +44,8 @@ namespace FileDialog {
                     *str = outPath;
                 else
                 {
-                    if (*base_str == outPath)
-                        *str = *base_str;
+                    if (*base_str == outPath) {}
+                        //*str = *base_str;{}
                     else
                         *str = FH::getRelativePath(*base_str, outPath);
                 }
@@ -54,8 +54,8 @@ namespace FileDialog {
             {
                 if (*base_str == outPath)
                 {
-                    str->append(*base_str);
-                    str->append(";");
+                    //str->append(*base_str);
+                    //str->append(";");
                 }
                 else
                 {

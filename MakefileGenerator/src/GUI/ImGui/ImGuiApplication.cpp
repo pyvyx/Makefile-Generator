@@ -78,6 +78,8 @@ namespace IGA {
 
     void createControlWindow(ControlWindowInfo* cwi)
     {
+        static IGWidget::TextInputWithHint outputFileName("##NameOutputFile", "Set a name for the binary");
+        
         static IGWidget::ComboBox compilerCombo("##CompilerCombo", "gcc\0g++\0clang\0clang++\0Other (Cf)");
         static IGWidget::TextInputWithHint compilerFlagsInput("##IncludeFlags", "Compiler flags e.G. myccompiler -O2 -o MyOut");
 
@@ -100,7 +102,7 @@ namespace IGA {
         static IGWidget::TextInputWithHint searchInput("##SearchFiles", "Search files");
 
         static std::array<IGWidget::Button*, 6> buttons = { &selectFiles, &selectLibraryDirs, &selectIncludeDirs, &selectOutputDir, &selectMakeFileOutputPath, &selectLibraries };
-        static std::array<IGWidget::TextInputWithHint*, 7> textInputs = { &searchInput, &libraryDirsInput, &includeDirsInput, &outputDir, &makeFileOutputPath, &libraryInput, &compilerFlagsInput };
+        static std::array<IGWidget::TextInputWithHint*, 8> textInputs = { &searchInput, &libraryDirsInput, &includeDirsInput, &outputDir, &makeFileOutputPath, &libraryInput, &compilerFlagsInput, &outputFileName };
 
         ImGui::SetNextWindowBgAlpha(1.f);
         if (IGW::g_Window->hasResized())
@@ -117,6 +119,9 @@ namespace IGA {
 
         if (selectedMakeFileOutputPath && makeFileOutputPath.input != "")
         {
+            if(outputFileName.added())
+            { }
+
             if (makeFileOutputPath.added())
             {
             }
@@ -179,6 +184,7 @@ namespace IGA {
         cwi->outputDir        = &outputDir.input;
         cwi->includeDirs      = &includeDirsInput.input;
         cwi->libraryDirs      = &libraryDirsInput.input;
+        cwi->outFileName      = &outputFileName.input;
 
         ImGui::End();
     }
@@ -204,7 +210,7 @@ namespace IGA {
             MG::GenerateMakeFile({ *cwi->selectedCompiler, *cwi->compilerFlags,
                 *cwi->linkLibraries, *cwi->makeFileOutput,
                 *cwi->outputDir, *cwi->includeDirs,
-                *cwi->libraryDirs, fileEntries, selectedBinaryFormat });
+                *cwi->libraryDirs, fileEntries, selectedBinaryFormat, *cwi->outFileName });
         }
 
         ImGui::SameLine(100.f);
@@ -234,9 +240,9 @@ namespace IGA {
     static const int MAX = 100;
     void fillTestVector()
     {
-        static FH::FileEntryVec& entries = FH::getFileEntriesRef();
-        for (int i = 0; i < MAX; ++i)
-            entries.push_back("File" + std::to_string(i));
+        //static FH::FileEntryVec& entries = FH::getFileEntriesRef();
+        //for (int i = 0; i < MAX; ++i)
+        //    entries.push_back("File" + std::to_string(i));
     }
 
     void createFileView()
