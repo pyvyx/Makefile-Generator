@@ -1,2 +1,14 @@
 add compiler options gcc/g++ && clang/clang++:
 	when selected use gcc/clang for c files and g++ and clang++ for c++ files
+
+add support for passing .rc files
+the target to build the exe has the libaries and lib dirs flags 2 times
+makefile always links the binaries together since the EXE file doesnt have the proper extension
+add .PHONY
+add headerfiles as depencies, in order to rebuild the project when they've been modified
+add a c++/c version selector (c++17/c++20...)
+use seperate flags for c++ and c
+add ability to select folder and then get all c/c++ files in this folder
+
+This makefile specific:
+	add -Wl,--subsystem,windows or -mwindows to remove the console (windows only)
