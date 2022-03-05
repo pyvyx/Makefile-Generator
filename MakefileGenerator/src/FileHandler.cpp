@@ -122,7 +122,7 @@ namespace FH {
 
 		std::string extension = std::filesystem::path(str).extension().generic_string();
 		std::string lowerCased = lowerCaseString(extension);
-		if (lowerCased == ".cpp" || lowerCased == ".cc" || lowerCased == ".cxx" || lowerCased == ".c++" || lowerCased == ".cp" || extension == ".C" || lowerCased == ".c")
+		if (lowerCased == ".cpp" || lowerCased == ".cc" || lowerCased == ".cxx" || lowerCased == ".c++" || lowerCased == ".cp" || extension == ".C" || lowerCased == ".c" || lowerCased == ".res")
 			sg_FileEntries.push_back({ str, extension });
 	}
 

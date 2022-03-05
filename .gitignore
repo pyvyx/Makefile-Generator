@@ -3,6 +3,7 @@
 
 BIN/
 Out/
+Test/
 
 *.user
 *.vcxproj.user

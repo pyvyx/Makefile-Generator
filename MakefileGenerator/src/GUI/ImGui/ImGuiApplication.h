@@ -24,13 +24,14 @@ namespace IGA {
     struct ControlWindowInfo
     {
         int* selectedCompiler = 0;
-        std::string* compilerFlags;
-        std::string* linkLibraries;
-        std::string* makeFileOutput;
-        std::string* outputDir;
-        std::string* includeDirs;
-        std::string* libraryDirs;
-        std::string* outFileName;
+        std::string* ccompilerFlags = nullptr;
+        std::string* cppcompilerFlags = nullptr;
+        std::string* linkLibraries = nullptr;
+        std::string* makeFileOutput = nullptr;
+        std::string* outputDir = nullptr;
+        std::string* includeDirs = nullptr;
+        std::string* libraryDirs = nullptr;
+        std::string* outFileName = nullptr;
     };
 
     void startApplication();

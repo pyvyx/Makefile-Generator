@@ -49,10 +49,10 @@ namespace IGW {
 
         // set window pointer and callbacks
         g_Window = this;
-        glfwSetCursorPosCallback      (m_Window, [](GLFWwindow* window, double xpos, double ypos)                        { sg_WindowEventHappened = 2; });
-        glfwSetMouseButtonCallback    (m_Window, [](GLFWwindow* window, int button,  int action,   int mods)             { sg_WindowEventHappened = 2; });
-        glfwSetKeyCallback            (m_Window, [](GLFWwindow* window, int key,     int scancode, int action, int mods) { sg_WindowEventHappened = 2; });
-        glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width,   int height ) { glViewport(0, 0, width, height); g_Window->resized(true); sg_WindowEventHappened = 2; });
+        glfwSetCursorPosCallback      (m_Window, [](GLFWwindow*, double, double)        { sg_WindowEventHappened = 2; });
+        glfwSetMouseButtonCallback    (m_Window, [](GLFWwindow*, int, int, int)         { sg_WindowEventHappened = 2; });
+        glfwSetKeyCallback            (m_Window, [](GLFWwindow*, int, int, int, int)    { sg_WindowEventHappened = 2; });
+        glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow*, int width,int height ) { glViewport(0, 0, width, height); g_Window->resized(true); sg_WindowEventHappened = 2; });
         
         glfwMakeContextCurrent(m_Window);
         glfwSwapInterval(1); // Enable vsync
