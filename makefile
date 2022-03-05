@@ -1,10 +1,10 @@
 CXXCOMP=g++
 CCOMP=gcc
-CXXFLAGS=-D _GLFW_WIN32 -Wl,--subsystem,windows -std=c++17 -O2 -s
+CXXFLAGS=-D _GLFW_WIN32 -Og -g # -Wl,--subsystem,windows -std=c++17 -O2 -s
 INCLUDEDIRS=-IDependencies/ImGui/include/ImGui/ -IDependencies/ImGui/include/ -IDependencies/nativefiledialog/include/nfd/ -IDependencies/nativefiledialog/include/ -IDependencies/GLFW/include/ -IMakefileGenerator/src/ -IMakefileGenerator/vendor/ 
 LIBRARYDIRS=
 LIBRARIES=-lopengl32 -lgdi32 -lole32 -luuid
-EXE=MakefileGenerator
+EXE=MakefileGenerator.exe
 OUTPUTFOLDER=Out
 INTFOLDER=Out\BIN
 

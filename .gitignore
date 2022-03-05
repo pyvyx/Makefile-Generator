@@ -2,6 +2,7 @@
 .vs/
 
 BIN/
+Out/
 
 *.user
 *.vcxproj.user

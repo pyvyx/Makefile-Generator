@@ -80,7 +80,7 @@ namespace IGA {
     {
         static IGWidget::TextInputWithHint outputFileName("##NameOutputFile", "Set a name for the binary");
         
-        static IGWidget::ComboBox compilerCombo("##CompilerCombo", "gcc\0g++\0clang\0clang++\0Other (Cf)");
+        static IGWidget::ComboBox compilerCombo("##CompilerCombo", "gcc\0g++\0clang\0clang++\0Other (Cf)\0");
         static IGWidget::TextInputWithHint compilerFlagsInput("##IncludeFlags", "Compiler flags e.G. myccompiler -O2 -o MyOut");
 
         static IGWidget::Button selectMakeFileOutputPath("Select file output##SelectFileOutput");
@@ -215,7 +215,7 @@ namespace IGA {
 
         ImGui::SameLine(100.f);
         ImGui::PushItemWidth(150.f);
-        if(ImGui::Combo("##SelectBinaryFormat", &selectedBinaryFormat,"Application\0Static library\0Dynamic library"))
+        if(ImGui::Combo("##SelectBinaryFormat", &selectedBinaryFormat,"Application\0Static library\0Dynamic library\0"))
         { }
 
         static bool selectAllChecked = false;
