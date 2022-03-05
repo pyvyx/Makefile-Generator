@@ -2,24 +2,31 @@
 #include <sstream>
 #include <unordered_set>
 #include <fstream>
+#include <functional>
+#include <algorithm>
 
 #include "Generator.h"
 #include "FileHandler.h"
 
-#define CC_GCC     0
-#define CC_GPP     1
-#define CC_CLANG   2
-#define CC_CLANGPP 3
-#define CC_OTHER   4
-
 namespace MG {
+
+	std::string WIN_OR_LINUX(const std::string& windows_case, const std::string& linux_case)
+	{
+		#ifdef _WIN32
+			return windows_case;
+		#endif
+		#if defined linux || defined __APPLE__
+			return linux_case;
+		#endif
+	}
 
 	struct MakeFileVariable
 	{
 		MakeFileVariable() = default;
-		MakeFileVariable(const std::string& mv, const std::string& va)
-			: makeVariable(mv), value(va) {}
+		MakeFileVariable(const std::string& mv, const std::string& var, const std::string& va)
+			: makeVariable(mv), variable(var), value(va) {}
 		std::string makeVariable;
+		std::string variable;
 		std::string value;
 	};
 
@@ -37,21 +44,24 @@ namespace MG {
 	}
 
 
-	MakeFileVariable getCompiler(int selectedCompiler)
+	std::pair<MakeFileVariable, MakeFileVariable> getCompiler(int selectedCompiler)
 	{
 		switch (selectedCompiler)
 		{
-		case CC_GCC:
-			return {"CXXCOMP", "gcc" };
-		case CC_GPP:
-			return { "CXXCOMP", "g++" };
-		case CC_CLANG:
-			return { "CXXCOMP", "clang" };
-		case CC_CLANGPP:
-			return { "CXXCOMP", "clang++" };
-		case CC_OTHER:
+		case Compiler::GCC_GPP:
+			return { {"$(CCOMP)", "CCOMP", "gcc"    }, {"$(CXXCOMP)", "CXXCOMP", "g++"    } };
+		case Compiler::Clang_ClangPP:
+			return { {"$(CCOMP)", "CCOMP", "clang"  }, {"$(CXXCOMP)", "CXXCOMP", "clang++"} };
+		case Compiler::GCC:
+			return { {"$(CCOMP)", "CCOMP", "gcc"    }, {"$(CXXCOMP)", "CXXCOMP", "gcc"    } };
+		case Compiler::GPP:
+			return { {"$(CCOMP)", "CCOMP", "g++"    }, {"$(CXXCOMP)", "CXXCOMP", "g++"    } };
+		case Compiler::Clang:
+			return { {"$(CCOMP)", "CCOMP", "clang"  }, {"$(CXXCOMP)", "CXXCOMP", "clang"  } };
+		case Compiler::ClangPP:
+			return { {"$(CCOMP)", "CCOMP", "clang++"}, {"$(CXXCOMP)", "CXXCOMP", "clang++"} };
 		default:
-			return { "CXXCOMP", "" };
+			return { {"$(CCOMP)", "CCOMP", ""       }, {"$(CXXCOMP)", "CXXCOMP", ""       } };
 		}
 	}
 
@@ -64,11 +74,11 @@ namespace MG {
 			result.append("-" + identifier + includeDirs[i] + "/ ");
 
 		if(identifier == "I")
-			return { "INCLUDEDIRS", result };
+			return { "$(INCLUDEDIRS)", "INCLUDEDIRS", result };
 		if (identifier == "L")
-			return { "LIBRARYDIRS", result };
+			return { "$(LIBRARYDIRS)", "LIBRARYDIRS", result };
 
-		return { "", result };
+		return { "", "", result };
 	}
 
 
@@ -79,7 +89,7 @@ namespace MG {
 	}
 
 
-	std::string getDirName(const std::string& fname)
+	std::string GetFilePath(const std::string& fname)
 	{
 		size_t pos = fname.find_last_of("\\/");
 		return (std::string::npos == pos) ? "" : fname.substr(0, pos);
@@ -93,7 +103,7 @@ namespace MG {
 		{
 			if (!vec[i].isDeleted())
 			{
-				std::string dirName = getDirName(vec[i].fileName());
+				std::string dirName = GetFilePath(vec[i].fileName());
 				if(dirName.size() > 0)
 					sourceDirs.insert(dirName + "/");
 				else
@@ -114,17 +124,6 @@ namespace MG {
 	}
 
 
-	std::string GetMakeVariable(const std::string& makeVar)
-	{
-		return "$(" + makeVar + ")";
-	}
-
-	std::string GetMakeVariable(const MakeFileVariable& makeVar)
-	{
-		return makeVar.makeVariable + "=" + makeVar.value;
-	}
-
-
 	struct BuildTargets
 	{
 		BuildTargets(const std::string& file, const MakeFileVariable& objfile, const std::string target)
@@ -137,14 +136,19 @@ namespace MG {
 
 	struct FileData
 	{
-		FileData(const MakeFileVariable& compiler, const MakeFileVariable& compilerFlags,
+		FileData(const MakeFileVariable& ccompiler, const MakeFileVariable& ccompilerFlags,
+			const MakeFileVariable& cppcompiler, const MakeFileVariable& cppcompilerFlags,
 			const MakeFileVariable& includeDirs, const MakeFileVariable& libraryDirs, const MakeFileVariable& libraries,
-			const MakeFileVariable& intFolder, const MakeFileVariable& outFolder, const MakeFileVariable& outFile)
-				: compiler(compiler), compilerFlags(compilerFlags), includeDirs(includeDirs), libraryDirs(libraryDirs),
-				libraries(libraries), intFolder(intFolder), outFolder(outFolder), outFile(outFile) {}
+			const MakeFileVariable& intFolder, const MakeFileVariable& outFolder, const MakeFileVariable& outFile
+		)
+			: ccompiler(ccompiler), ccompilerFlags(ccompilerFlags), cppcompiler(cppcompiler), cppcompilerFlags(cppcompilerFlags),
+			includeDirs(includeDirs), libraryDirs(libraryDirs), libraries(libraries), intFolder(intFolder),
+			outFolder(outFolder), outFile(outFile) {}
 
-		MakeFileVariable compiler;
-		MakeFileVariable compilerFlags;
+		MakeFileVariable ccompiler;
+		MakeFileVariable ccompilerFlags;
+		MakeFileVariable cppcompiler;
+		MakeFileVariable cppcompilerFlags;
 		MakeFileVariable includeDirs;
 		MakeFileVariable libraryDirs;
 		MakeFileVariable libraries;
@@ -155,16 +159,32 @@ namespace MG {
 	};
 
 
-	std::vector<BuildTargets> CreateFileVariables(const FileData& fd, FH::FileEntryVec& vec)
+	std::pair<std::vector<BuildTargets>, MakeFileVariable> CreateFileVariables(const FileData& fd, FH::FileEntryVec& vec)
 	{
 		std::unordered_set<std::string> extensions = GetAllFileExtensions(vec);
 		std::vector<BuildTargets> ve;
 		std::string targets;
 
+		auto lowerCaseString = [=](std::string str) {
+			std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+			return str;
+		};
+		MakeFileVariable resFiles("$(RESFILES)", "RESFILES", "");
+
 		for (const auto& i : extensions)
 		{
+			if (lowerCaseString(i) == ".res")
+			{
+				for (auto& j : vec)
+				{
+					if (j.extension() == i && !j.isDeleted())
+						resFiles.value += j.fileName() + " ";
+				}
+				continue;
+			}
+
 			std::string sourceFiles = "SRCFILES" + i.substr(1, i.size() - 1);
-			MakeFileVariable objFiles("OBJFILES" + i.substr(1, i.size() - 1), "$(addprefix " + GetMakeVariable(fd.intFolder.makeVariable) + "/, $(notdir $(" + sourceFiles + ":" + i + "=.o)))");
+			MakeFileVariable objFiles("$(OBJFILES" + i.substr(1, i.size() - 1) + ")", "OBJFILES" + i.substr(1, i.size() - 1), "$(addprefix " + fd.intFolder.makeVariable + "/, $(notdir $(" + sourceFiles + ":" + i + "=.o)))");
 			sourceFiles += "=";
 
 			for (auto& j : vec)
@@ -176,57 +196,58 @@ namespace MG {
 			std::unordered_set<std::string> sourceDirs = getAllSourceDirectories(vec);
 			for (auto& j : sourceDirs)
 			{
-				std::string buildTarget = GetMakeVariable(fd.intFolder.makeVariable) + "/%.o: " + j + "%" + i + "\n\t" + GetMakeVariable(fd.compiler.makeVariable) + " " +
-					GetMakeVariable(fd.compilerFlags.makeVariable) + " -c $< -o $@ " + GetMakeVariable(fd.includeDirs.makeVariable) +
-					" " + GetMakeVariable(fd.libraryDirs.makeVariable) + " " + GetMakeVariable(fd.libraries.makeVariable);
+				std::string compiler = i == ".c" ? fd.ccompiler.makeVariable : fd.cppcompiler.makeVariable;
+				std::string compilerFlags = i == ".c" ? fd.ccompilerFlags.makeVariable : fd.cppcompilerFlags.makeVariable;
+
+				std::string buildTarget = fd.intFolder.makeVariable + "/%.o: " + j + "%" + i + "\n\t" + compiler + " " +
+					compilerFlags + " -c $< -o $@ " + fd.includeDirs.makeVariable;
 				targets += buildTarget + "\n\n";
 			}
 			ve.push_back(BuildTargets(sourceFiles, objFiles, targets));
 			targets.clear();
 		}
-		return ve;
+		return { ve, resFiles };
 	}
 
 
-	std::string CreateFileBuildTarget(const std::vector<BuildTargets>& vec, const FileData& fd)
+	std::string CreateFileBuildTarget(const std::vector<BuildTargets>& vec, const FileData& fd, const MakeFileVariable resFiles)
 	{
-		std::string target = GetMakeVariable(fd.outFolder.makeVariable) + "/" + GetMakeVariable(fd.outFile.makeVariable) + ": ";
+		std::string target = fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + ": ";
 		for (auto& i : vec)
 		{
-			target += GetMakeVariable(i.objfiles.makeVariable) + " ";
+			target += i.objfiles.makeVariable + " ";
 		}
 		target += "\n\t";
 
 		if (fd.buildMode == BuildModes::Application)
 		{
-			target += GetMakeVariable(fd.compiler.makeVariable) + " " + GetMakeVariable(fd.compilerFlags.makeVariable) + " ";
+			target += fd.cppcompiler.makeVariable + " " + fd.cppcompilerFlags.makeVariable + " ";
 			for (auto& i : vec)
-				target += GetMakeVariable(i.objfiles.makeVariable) + " ";
-			target += " -o " + GetMakeVariable(fd.outFolder.makeVariable) + "/" + GetMakeVariable(fd.outFile.makeVariable) + " ";
-			target += GetMakeVariable(fd.includeDirs.makeVariable) + " " + GetMakeVariable(fd.libraryDirs.makeVariable) + " ";
-			target += GetMakeVariable(fd.libraries.makeVariable);
-			target += " " + GetMakeVariable(fd.libraryDirs.makeVariable) + " " + GetMakeVariable(fd.libraries.makeVariable);
+				target += i.objfiles.makeVariable + " ";
+			target += resFiles.makeVariable;
+			target += " -o " + fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + " ";
+			target += fd.libraryDirs.makeVariable + " " + fd.libraries.makeVariable;
 		}
 		else if (fd.buildMode == BuildModes::StaticLibrary)
 		{
-			target += "ar rcs " + GetMakeVariable(fd.outFolder.makeVariable) + "/lib" + GetMakeVariable(fd.outFile.makeVariable) + ".a";
+			target += "ar rcs " + fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + "";
 			target += " ";
 			for (auto& i : vec)
-				target += GetMakeVariable(i.objfiles.makeVariable) + " ";
+				target += i.objfiles.makeVariable + " ";
 		}
 		else if (fd.buildMode == BuildModes::DynamicLibrary)
 		{
-			target += GetMakeVariable(fd.compiler.makeVariable) + " -shared ";
+			target += fd.cppcompiler.makeVariable + " -shared ";
 			for (auto& i : vec)
-				target += GetMakeVariable(i.objfiles.makeVariable) + " ";
-			target += " -o " + GetMakeVariable(fd.outFolder.makeVariable) + "/lib" + GetMakeVariable(fd.outFile.makeVariable) + ".so";
-			target += " " + GetMakeVariable(fd.libraryDirs.makeVariable) + " " + GetMakeVariable(fd.libraries.makeVariable);
+				target += i.objfiles.makeVariable + " ";
+			target += "-o " + fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + "";
+			target += " " + fd.libraryDirs.makeVariable + " " + fd.libraries.makeVariable;
 		}
 		return target;
 	}
 
 
-	void WriteMakeFile(const FileData& fd, const std::vector<BuildTargets>& buildTargets, const std::string& makefileOutput)
+	void WriteMakeFile(const FileData& fd, const std::string& makefileOutput, FH::FileEntryVec& vec)
 	{
 		std::ofstream makeFile(makefileOutput + "/makefile");
 		if (!makeFile)
@@ -234,126 +255,73 @@ namespace MG {
 			return;
 		}
 
-		makeFile << GetMakeVariable(fd.compiler) << '\n';
-		makeFile << GetMakeVariable(fd.compilerFlags) << '\n';
-		makeFile << GetMakeVariable(fd.includeDirs) << '\n';
-		makeFile << GetMakeVariable(fd.libraryDirs) << '\n';
-		makeFile << GetMakeVariable(fd.libraries) << '\n';
-		makeFile << GetMakeVariable(fd.outFile) << '\n';
-		makeFile << GetMakeVariable(fd.outFolder) << '\n';
-		makeFile << GetMakeVariable(fd.intFolder) << "\n\n";
+		std::pair<std::vector<BuildTargets>, MakeFileVariable> targets = CreateFileVariables(fd, vec);
+		std::vector<BuildTargets> buildTargets = targets.first;
+		MakeFileVariable resFiles = targets.second;
 
+		std::function<std::string(const MakeFileVariable&)> 
+			getMakeVariable = [&](const MakeFileVariable& makeVar) -> std::string{ return makeVar.variable + "=" + makeVar.value; };
+
+		makeFile << getMakeVariable(fd.ccompiler) << '\n';
+		makeFile << getMakeVariable(fd.ccompilerFlags) << '\n';
+		makeFile << getMakeVariable(fd.cppcompiler) << '\n';
+		makeFile << getMakeVariable(fd.cppcompilerFlags) << '\n';
+		makeFile << getMakeVariable(fd.includeDirs) << '\n';
+		makeFile << getMakeVariable(fd.libraryDirs) << '\n';
+		makeFile << getMakeVariable(fd.libraries) << '\n';
+		makeFile << getMakeVariable(fd.outFile) << '\n';
+		makeFile << getMakeVariable(fd.outFolder) << '\n';
+		makeFile << getMakeVariable(fd.intFolder) << '\n';
+		makeFile << getMakeVariable(resFiles) << "\n\n";
+
+		std::string extensionTargets;
+		extensionTargets.reserve(buildTargets.size() * buildTargets[0].targets.size() + 10); // 10 is an arbitrary number
 		for (auto& i : buildTargets)
 		{
 			makeFile << i.srcfiles << std::endl;
-			makeFile << i.objfiles.makeVariable << "=" << i.objfiles.value << std::endl;
+			makeFile << i.objfiles.variable << "=" << i.objfiles.value << std::endl;
+			extensionTargets += i.targets + "\n";
 		}
 
 		makeFile << "\n#Do not edit below this line\n";
-		makeFile << "Build: " << GetMakeVariable(fd.outFolder.makeVariable) << " " << GetMakeVariable(fd.intFolder.makeVariable) << " " << GetMakeVariable(fd.outFolder.makeVariable) << "/";
-		makeFile << GetMakeVariable(fd.outFile.makeVariable) << "\n\n";
-		makeFile << CreateFileBuildTarget(buildTargets, fd) << "\n\n";
+		makeFile << ".PHONY: build clean rebuild\n\n";
+		makeFile << "build: " << fd.outFolder.makeVariable << " " << fd.intFolder.makeVariable << " " << fd.outFolder.makeVariable << "/";
+		makeFile << fd.outFile.makeVariable << "\n\n";
+		makeFile << "rebuild: clean build\n\n";
+		makeFile << CreateFileBuildTarget(buildTargets, fd, resFiles) << "\n\n\n";
 
-		for (auto& i : buildTargets)
-		{
-			makeFile << i.targets << '\n';
-		}
+		makeFile << extensionTargets;
+		//for (auto& i : buildTargets)
+		//{
+		//	makeFile << i.targets << '\n';
+		//}
 
-		makeFile << generateTarget(GetMakeVariable(fd.outFolder.makeVariable), "", "\tmkdir " + GetMakeVariable(fd.outFolder.makeVariable)) << '\n';
-		makeFile << generateTarget(GetMakeVariable(fd.intFolder.makeVariable), "", "\tmkdir " + GetMakeVariable(fd.intFolder.makeVariable)) << "\n\n";
-		makeFile << generateTarget("clean", "", "\trmdir /s /q " + GetMakeVariable(fd.outFolder.makeVariable));
+		makeFile << generateTarget(fd.outFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.outFolder.makeVariable) << '\n';
+		makeFile << generateTarget(fd.intFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.intFolder.makeVariable) << "\n\n";
+		makeFile << generateTarget("clean", "", WIN_OR_LINUX("\trmdir /s /q ", "\trm -r ") + fd.outFolder.makeVariable);
 		makeFile.close();
 	}
 
 
 	void GenerateMakeFile(GeneratorInfo info)
 	{
-		MakeFileVariable compiler = getCompiler(info.selectedCompiler);
-		MakeFileVariable compilerFlags("CXXFLAGS", info.compilerFlags);
+		std::pair<MakeFileVariable, MakeFileVariable> compiler = getCompiler(info.selectedCompiler);
+		MakeFileVariable ccompiler = compiler.first;
+		MakeFileVariable ccompilerFlags("$(CFLAGS)", "CFLAGS", info.ccompilerFlags);
+		MakeFileVariable cppcompiler = compiler.second;
+		MakeFileVariable cppcompilerFlags("$(CXXFLAGS)", "CXXFLAGS", info.cppcompilerFlags);
 		MakeFileVariable includeDirectories = createDirectoryPaths(info.includeDirs, "I");
 		MakeFileVariable libraryDirectories = createDirectoryPaths(info.libraryDirs, "L");
-		MakeFileVariable libraries("LIBRARIES", info.linkLibraries);
-		MakeFileVariable outFile("EXE", info.outFileName == "" ? "MyOutput" : info.outFileName);
+		MakeFileVariable libraries("$(LIBRARIES)", "LIBRARIES", info.linkLibraries);
+		MakeFileVariable outFile("$(EXE)", "EXE", info.outFileName == "" ? "MyOutput" : info.outFileName);
 
 		std::string outDir = info.outputDir == "" ? "Out" : info.outputDir;
-		MakeFileVariable outFolder("OUTPUTFOLDER", outDir);
-		MakeFileVariable intFolder("INTFOLDER", outDir + "\\BIN");
+		MakeFileVariable outFolder("$(OUTPUTFOLDER)", "OUTPUTFOLDER", outDir);
+		MakeFileVariable intFolder("$(INTFOLDER)", "INTFOLDER", outDir + WIN_OR_LINUX("\\BIN", "/BIN"));
 
-		FileData fd(compiler, compilerFlags, includeDirectories, libraryDirectories, libraries, intFolder, outFolder, outFile);
+		FileData fd(ccompiler, ccompilerFlags, cppcompiler, cppcompilerFlags, includeDirectories, libraryDirectories, libraries, intFolder, outFolder, outFile);
 		fd.buildMode = info.selectedBinaryFormat;
 
-		std::vector<BuildTargets> buildTargets = CreateFileVariables(fd, info.files);
-		WriteMakeFile(fd, buildTargets, info.makeFileOutput);
+		WriteMakeFile(fd, info.makeFileOutput, info.files);
 	}
-		/*
-		std::ofstream makeFile(info.makeFileOutput + "/makefile");
-
-		makeFile << GetMakeVariable(compiler) << '\n';
-		makeFile << GetMakeVariable(compilerFlags) << '\n';
-		makeFile << GetMakeVariable(includeDirectories) << '\n';
-		makeFile << GetMakeVariable(libraryDirectories) << '\n';
-		makeFile << GetMakeVariable(libraries) << '\n';
-
-		for (auto& i : buildTargets)
-		{
-			makeFile << i.srcfiles << std::endl;
-			makeFile << i.objfiles.makeVariable << "=" << i.objfiles.value << std::endl;
-		}
-		makeFile << "#Do not edit below this line\n";
-		makeFile << "Build: out/" + outputFile.value + " ";
-		for (auto& i : buildTargets)
-		{
-			makeFile << GetMakeVariable(i.objfiles.makeVariable) << " ";
-		}
-		makeFile << std::endl << std::endl;
-
-		makeFile << exe << std::endl << std::endl;
-
-		for (auto& i : buildTargets)
-		{
-			makeFile << i.targets << std::endl;
-		}
-
-		makeFile.close();
-		*/
-		
-		//for (auto& i : fileExtensions)
-		//{
-		//	std::cout << i << std::endl;
-		//}
-
-
-		/*
-		if (info.outputDir == "")
-			info.outputDir = "out";
-
-		std::string compiler = getCompiler(info.selectedCompiler);
-		std::string includeDirectories = createDirectoryPaths(info.includeDirs, "I");
-		std::string libraryDirectories = createDirectoryPaths(info.libraryDirs, "L");
-
-		std::string buildObjFilesCommand = compiler + " " + info.compilerFlags + " -c $< -o $@ " + includeDirectories;
-		std::string sourceFiles = createFileVariables(info.files, info.outputDir).first;
-		std::string objectFiles = createFileVariables(info.files, info.outputDir).second;
-
-		std::unordered_set<std::string> sourceDirs = getAllSourceDirectories(info.files);
-
-		std::string objectTargets;
-		for (const auto& i : sourceDirs)
-			objectTargets += generateTarget("out/%.o", i + "%.c", "\t" + buildObjFilesCommand + "\n\n");
-			//objectTargets += generateTarget("out/%.o", i + "%.c", "\tgcc -D _GLFW_WIN32 -c $< -o $@ " + includeDirectories + "\n\n");
-
-		std::cout << objectTargets << std::endl;
-		std::string buildTarget = generateTarget("Build", "$(OBJ_FILES)", "");
-
-		std::ofstream makeFile(info.makeFileOutput + "/makefile");
-		
-		makeFile << sourceFiles << '\n';
-		makeFile << objectFiles << '\n';
-		makeFile << buildTarget << '\n';
-		makeFile << objectTargets << '\n';
-		
-		makeFile.close();
-		*/
-		//std::unordered_set<std::string> sourceDirs = getAllSourceDirectories(info.files);
-		//std::cout << generateTarget(info.outputDir + "/" + "%.o", *sourceDirs.begin() + "%.cpp", "\ttest");
 }

@@ -1,2 +1,5 @@
 Linker -> System -> Subsytem:Window
 Linker -> Advanced -> Entry Point: mainCRTStartup
+
+gcc:
+	add -Wl,--subsystem,windows or -mwindows to remove the console (windows only)

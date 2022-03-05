@@ -1,65 +1,78 @@
-CXXCOMP=g++
 CCOMP=gcc
-CXXFLAGS=-D _GLFW_WIN32 -Wl,--subsystem,windows -std=c++17 -O2 -s
+CFLAGS=-D _GLFW_WIN32 -O2 -s
+CXXCOMP=g++
+CXXFLAGS=-Wl,--subsystem,windows -O2 -s -std=c++17
 INCLUDEDIRS=-IDependencies/ImGui/include/ImGui/ -IDependencies/ImGui/include/ -IDependencies/nativefiledialog/include/nfd/ -IDependencies/nativefiledialog/include/ -IDependencies/GLFW/include/ -IMakefileGenerator/src/ -IMakefileGenerator/vendor/ 
 LIBRARYDIRS=
 LIBRARIES=-lopengl32 -lgdi32 -lole32 -luuid
-EXE=MakefileGenerator
+EXE=MakefileGenerator.exe
 OUTPUTFOLDER=Out
 INTFOLDER=Out\BIN
+RESFILES=MakefileGenerator/icon/gcc.res 
 
-SRCFILEScpp=Dependencies/ImGui/src/imgui.cpp Dependencies/ImGui/src/imgui_demo.cpp Dependencies/ImGui/src/imgui_draw.cpp Dependencies/ImGui/src/imgui_impl_glfw.cpp Dependencies/ImGui/src/imgui_impl_opengl3.cpp Dependencies/ImGui/src/imgui_stdlib.cpp Dependencies/ImGui/src/imgui_tables.cpp Dependencies/ImGui/src/imgui_widgets.cpp Dependencies/nativefiledialog/src/example.cpp Dependencies/nativefiledialog/src/nfd_win.cpp MakefileGenerator/src/FileHandler.cpp MakefileGenerator/src/Generator.cpp MakefileGenerator/src/main.cpp MakefileGenerator/src/Timer.cpp MakefileGenerator/src/GUI/ImGui/ImGuiApplication.cpp MakefileGenerator/src/GUI/ImGui/ImGuiWindow.cpp MakefileGenerator/src/GUI/ImGui/Widgets/ImGuiButton.cpp MakefileGenerator/src/GUI/ImGui/Widgets/ImGuiComboBox.cpp MakefileGenerator/src/GUI/ImGui/Widgets/ImGuiTextInputWithHint.cpp MakefileGenerator/src/GUI/FileDialog/FileDialog.cpp 
-OBJFILEScpp=$(addprefix $(INTFOLDER)/, $(notdir $(SRCFILEScpp:.cpp=.o)))
 SRCFILESc=Dependencies/GLFW/src/context.c Dependencies/GLFW/src/egl_context.c Dependencies/GLFW/src/init.c Dependencies/GLFW/src/input.c Dependencies/GLFW/src/monitor.c Dependencies/GLFW/src/osmesa_context.c Dependencies/GLFW/src/vulkan.c Dependencies/GLFW/src/wgl_context.c Dependencies/GLFW/src/win32_init.c Dependencies/GLFW/src/win32_joystick.c Dependencies/GLFW/src/win32_monitor.c Dependencies/GLFW/src/win32_thread.c Dependencies/GLFW/src/win32_time.c Dependencies/GLFW/src/win32_window.c Dependencies/GLFW/src/window.c Dependencies/nativefiledialog/src/nfd_common.c 
 OBJFILESc=$(addprefix $(INTFOLDER)/, $(notdir $(SRCFILESc:.c=.o)))
+SRCFILEScpp=MakefileGenerator/src/FileHandler.cpp MakefileGenerator/src/Generator.cpp MakefileGenerator/src/main.cpp MakefileGenerator/src/Timer.cpp MakefileGenerator/src/GUI/ImGui/ImGuiApplication.cpp MakefileGenerator/src/GUI/ImGui/ImGuiWindow.cpp MakefileGenerator/src/GUI/ImGui/Widgets/ImGuiButton.cpp MakefileGenerator/src/GUI/ImGui/Widgets/ImGuiComboBox.cpp MakefileGenerator/src/GUI/ImGui/Widgets/ImGuiTextInputWithHint.cpp MakefileGenerator/src/GUI/FileDialog/FileDialog.cpp Dependencies/ImGui/src/imgui.cpp Dependencies/ImGui/src/imgui_demo.cpp Dependencies/ImGui/src/imgui_draw.cpp Dependencies/ImGui/src/imgui_impl_glfw.cpp Dependencies/ImGui/src/imgui_impl_opengl3.cpp Dependencies/ImGui/src/imgui_stdlib.cpp Dependencies/ImGui/src/imgui_tables.cpp Dependencies/ImGui/src/imgui_widgets.cpp Dependencies/nativefiledialog/src/example.cpp Dependencies/nativefiledialog/src/nfd_win.cpp 
+OBJFILEScpp=$(addprefix $(INTFOLDER)/, $(notdir $(SRCFILEScpp:.cpp=.o)))
 
 #Do not edit below this line
-Build: $(OUTPUTFOLDER) $(INTFOLDER) $(OUTPUTFOLDER)/$(EXE)
+.PHONY: build clean rebuild
 
-$(OUTPUTFOLDER)/$(EXE): $(OBJFILEScpp) $(OBJFILESc) 
-	$(CXXCOMP) $(CXXFLAGS) $(OBJFILEScpp) $(OBJFILESc)  -o $(OUTPUTFOLDER)/$(EXE) $(INCLUDEDIRS) $(LIBRARYDIRS) $(LIBRARIES)
+build: $(OUTPUTFOLDER) $(INTFOLDER) $(OUTPUTFOLDER)/$(EXE)
 
-$(INTFOLDER)/%.o: Dependencies/GLFW/src/%.cpp
-	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+rebuild: clean build
 
-$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/ImGui/Widgets/%.cpp
-	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+$(OUTPUTFOLDER)/$(EXE): $(OBJFILESc) $(OBJFILEScpp) 
+	$(CXXCOMP) $(CXXFLAGS) $(OBJFILESc) $(OBJFILEScpp) $(RESFILES) -o $(OUTPUTFOLDER)/$(EXE) $(LIBRARYDIRS) $(LIBRARIES)
 
-$(INTFOLDER)/%.o: MakefileGenerator/src/%.cpp
+
+$(INTFOLDER)/%.o: Dependencies/nativefiledialog/src/%.c
+	$(CCOMP) $(CFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+
+$(INTFOLDER)/%.o: Dependencies/ImGui/src/%.c
+	$(CCOMP) $(CFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+
+$(INTFOLDER)/%.o: MakefileGenerator/icon/%.c
+	$(CCOMP) $(CFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+
+$(INTFOLDER)/%.o: Dependencies/GLFW/src/%.c
+	$(CCOMP) $(CFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+
+$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/FileDialog/%.c
+	$(CCOMP) $(CFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+
+$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/ImGui/Widgets/%.c
+	$(CCOMP) $(CFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+
+$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/ImGui/%.c
+	$(CCOMP) $(CFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+
+$(INTFOLDER)/%.o: MakefileGenerator/src/%.c
+	$(CCOMP) $(CFLAGS) -c $< -o $@ $(INCLUDEDIRS)
+
+
+$(INTFOLDER)/%.o: Dependencies/nativefiledialog/src/%.cpp
 	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
 
 $(INTFOLDER)/%.o: Dependencies/ImGui/src/%.cpp
 	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
 
-$(INTFOLDER)/%.o: Dependencies/nativefiledialog/src/%.cpp
+$(INTFOLDER)/%.o: MakefileGenerator/icon/%.cpp
 	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
 
-$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/ImGui/%.cpp
+$(INTFOLDER)/%.o: Dependencies/GLFW/src/%.cpp
 	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
 
 $(INTFOLDER)/%.o: MakefileGenerator/src/GUI/FileDialog/%.cpp
 	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
 
-
-$(INTFOLDER)/%.o: Dependencies/GLFW/src/%.c
-	$(CCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
-
-$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/ImGui/Widgets/%.c
+$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/ImGui/Widgets/%.cpp
 	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
 
-$(INTFOLDER)/%.o: MakefileGenerator/src/%.c
+$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/ImGui/%.cpp
 	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
 
-$(INTFOLDER)/%.o: Dependencies/ImGui/src/%.c
-	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
-
-$(INTFOLDER)/%.o: Dependencies/nativefiledialog/src/%.c
-	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
-
-$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/ImGui/%.c
-	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
-
-$(INTFOLDER)/%.o: MakefileGenerator/src/GUI/FileDialog/%.c
+$(INTFOLDER)/%.o: MakefileGenerator/src/%.cpp
 	$(CXXCOMP) $(CXXFLAGS) -c $< -o $@ $(INCLUDEDIRS)
 
 
