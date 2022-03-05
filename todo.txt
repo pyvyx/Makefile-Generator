@@ -12,5 +12,5 @@ This makefile specific:
 
 --done: the target to build the exe has the libaries and lib dirs flags 2 times
 --done: add .PHONY
---done: add support for passing .rc files
+--done: add support for passing .res files
 --fixed: makefile always links the binaries together since the EXE file doesnt have the proper extension
