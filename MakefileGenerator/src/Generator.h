@@ -9,6 +9,7 @@ namespace MG {
     struct GeneratorInfo
     {
         int selectedCompiler = 0;
+        bool usePIL = true;
         std::string ccompilerFlags;
         std::string cppcompilerFlags;
         std::string linkLibraries;
@@ -18,6 +19,7 @@ namespace MG {
         std::string libraryDirs;
         std::vector<FH::FileEntry> files;
         int selectedBinaryFormat = 0;
+        std::string dllFileName;
         std::string outFileName;
 
         void print()
@@ -53,13 +55,4 @@ namespace MG {
     };
 
     void GenerateMakeFile(GeneratorInfo info);
-
-    //void GenerateMakeFile(cstring& compilerFlags, int selectedCompiler,
-    //    cstring& link_libs, cstring& makeFileDir, cstring& binaryOutputDir, cstring& includeDirs,
-    //    cstring& libraryDirs, const std::vector<FH::FileEntry>& files, int selectedBinaryFormat);
-
-    //MG::GenerateMakeFile(compiler_flags, selected_compiler,
-        //    linked_libs, outputfile, output_dir, include_dirs,
-        //    library_dirs, files, selected_binary);
-
 }

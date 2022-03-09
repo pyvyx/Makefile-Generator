@@ -23,7 +23,9 @@ namespace IGA {
 
     struct ControlWindowInfo
     {
-        int* selectedCompiler = 0;
+        int* selectedCompiler = nullptr;
+        int selectedBinaryFormat = 0;
+        bool* usePIL = nullptr;
         std::string* ccompilerFlags = nullptr;
         std::string* cppcompilerFlags = nullptr;
         std::string* linkLibraries = nullptr;

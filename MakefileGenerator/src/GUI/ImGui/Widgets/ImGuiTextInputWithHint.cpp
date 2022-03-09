@@ -6,6 +6,7 @@
 #include "ImGuiTextInputWithHint.h"
 #include "GUI/ImGui/Widgets/ImGuiSizeProperties.h"
 
+
 namespace IGWidget {
 
     TextInputWithHint::TextInputWithHint()
@@ -36,5 +37,4 @@ namespace IGWidget {
         // set text input size
         length = IGWidget_X_SIZE_TEXT_INPUT(ws.x);
     }
-
 }

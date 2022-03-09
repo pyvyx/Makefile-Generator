@@ -8,6 +8,7 @@
 #include "Generator.h"
 #include "FileHandler.h"
 
+
 namespace MG {
 
 	std::string WIN_OR_LINUX(const std::string& windows_case, const std::string& linux_case)
@@ -139,11 +140,11 @@ namespace MG {
 		FileData(const MakeFileVariable& ccompiler, const MakeFileVariable& ccompilerFlags,
 			const MakeFileVariable& cppcompiler, const MakeFileVariable& cppcompilerFlags,
 			const MakeFileVariable& includeDirs, const MakeFileVariable& libraryDirs, const MakeFileVariable& libraries,
-			const MakeFileVariable& intFolder, const MakeFileVariable& outFolder, const MakeFileVariable& outFile
+			const MakeFileVariable& intFolder, const MakeFileVariable& outFolder, const MakeFileVariable& outFile, bool usePIL
 		)
 			: ccompiler(ccompiler), ccompilerFlags(ccompilerFlags), cppcompiler(cppcompiler), cppcompilerFlags(cppcompilerFlags),
 			includeDirs(includeDirs), libraryDirs(libraryDirs), libraries(libraries), intFolder(intFolder),
-			outFolder(outFolder), outFile(outFile) {}
+			outFolder(outFolder), outFile(outFile), usePIL(usePIL) {}
 
 		MakeFileVariable ccompiler;
 		MakeFileVariable ccompilerFlags;
@@ -155,7 +156,11 @@ namespace MG {
 		MakeFileVariable intFolder;
 		MakeFileVariable outFolder;
 		MakeFileVariable outFile;
+		MakeFileVariable* outFileDll = nullptr;
+		bool usePIL = true;
 		int buildMode = 0;
+		bool useDll = false;
+		std::string rawOutFileName;
 	};
 
 
@@ -222,11 +227,16 @@ namespace MG {
 		if (fd.buildMode == BuildModes::Application)
 		{
 			target += fd.cppcompiler.makeVariable + " " + fd.cppcompilerFlags.makeVariable + " ";
+			if(fd.usePIL)
+				target += fd.libraries.makeVariable + " ";
+
 			for (auto& i : vec)
 				target += i.objfiles.makeVariable + " ";
 			target += resFiles.makeVariable;
 			target += " -o " + fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + " ";
 			target += fd.libraryDirs.makeVariable + " " + fd.libraries.makeVariable;
+			if (fd.usePIL)
+				target += " " + fd.libraries.makeVariable;
 		}
 		else if (fd.buildMode == BuildModes::StaticLibrary)
 		{
@@ -237,11 +247,16 @@ namespace MG {
 		}
 		else if (fd.buildMode == BuildModes::DynamicLibrary)
 		{
-			target += fd.cppcompiler.makeVariable + " -shared ";
+			target += fd.cppcompiler.makeVariable + " -shared -Wl,--out-implib," + fd.outFolder.makeVariable 
+				+ "/" + fd.outFileDll->makeVariable + " ";
+			if (fd.usePIL)
+				target += fd.libraries.makeVariable + " ";
 			for (auto& i : vec)
 				target += i.objfiles.makeVariable + " ";
 			target += "-o " + fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + "";
 			target += " " + fd.libraryDirs.makeVariable + " " + fd.libraries.makeVariable;
+			if (fd.usePIL)
+				target += " " + fd.libraries.makeVariable;
 		}
 		return target;
 	}
@@ -270,6 +285,8 @@ namespace MG {
 		makeFile << getMakeVariable(fd.libraryDirs) << '\n';
 		makeFile << getMakeVariable(fd.libraries) << '\n';
 		makeFile << getMakeVariable(fd.outFile) << '\n';
+		if(fd.outFileDll != nullptr)
+			makeFile << getMakeVariable(*fd.outFileDll) << '\n';
 		makeFile << getMakeVariable(fd.outFolder) << '\n';
 		makeFile << getMakeVariable(fd.intFolder) << '\n';
 		makeFile << getMakeVariable(resFiles) << "\n\n";
@@ -291,10 +308,6 @@ namespace MG {
 		makeFile << CreateFileBuildTarget(buildTargets, fd, resFiles) << "\n\n\n";
 
 		makeFile << extensionTargets;
-		//for (auto& i : buildTargets)
-		//{
-		//	makeFile << i.targets << '\n';
-		//}
 
 		makeFile << generateTarget(fd.outFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.outFolder.makeVariable) << '\n';
 		makeFile << generateTarget(fd.intFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.intFolder.makeVariable) << "\n\n";
@@ -305,6 +318,9 @@ namespace MG {
 
 	void GenerateMakeFile(GeneratorInfo info)
 	{
+		if (info.makeFileOutput == "" || info.files.size() == 0)
+			return;
+
 		std::pair<MakeFileVariable, MakeFileVariable> compiler = getCompiler(info.selectedCompiler);
 		MakeFileVariable ccompiler = compiler.first;
 		MakeFileVariable ccompilerFlags("$(CFLAGS)", "CFLAGS", info.ccompilerFlags);
@@ -313,14 +329,23 @@ namespace MG {
 		MakeFileVariable includeDirectories = createDirectoryPaths(info.includeDirs, "I");
 		MakeFileVariable libraryDirectories = createDirectoryPaths(info.libraryDirs, "L");
 		MakeFileVariable libraries("$(LIBRARIES)", "LIBRARIES", info.linkLibraries);
-		MakeFileVariable outFile("$(EXE)", "EXE", info.outFileName == "" ? "MyOutput" : info.outFileName);
 
+		MakeFileVariable outFile("$(EXE)", "EXE", info.outFileName == "" ? "MyOutput" : info.outFileName);
+	
 		std::string outDir = info.outputDir == "" ? "Out" : info.outputDir;
 		MakeFileVariable outFolder("$(OUTPUTFOLDER)", "OUTPUTFOLDER", outDir);
 		MakeFileVariable intFolder("$(INTFOLDER)", "INTFOLDER", outDir + WIN_OR_LINUX("\\BIN", "/BIN"));
 
-		FileData fd(ccompiler, ccompilerFlags, cppcompiler, cppcompilerFlags, includeDirectories, libraryDirectories, libraries, intFolder, outFolder, outFile);
+		FileData fd(ccompiler, ccompilerFlags, cppcompiler, cppcompilerFlags, includeDirectories, libraryDirectories, libraries, intFolder, outFolder, outFile, info.usePIL);
 		fd.buildMode = info.selectedBinaryFormat;
+		fd.rawOutFileName = info.outFileName;
+		
+		MakeFileVariable outFileDll("$(DLLLIB)", "DLLLIB", info.dllFileName == "" ? "MyOutputDll" : info.dllFileName);
+		if (info.selectedBinaryFormat == BuildModes::DynamicLibrary)
+		{
+			fd.outFileDll = &outFileDll;
+		}
+
 
 		WriteMakeFile(fd, info.makeFileOutput, info.files);
 	}

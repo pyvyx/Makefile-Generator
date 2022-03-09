@@ -2,6 +2,7 @@
 #include <array>
 
 #include "ImGui/imgui.h"
+#include "ImGui/imgui_stdlib.h"
 
 // GUI includes
 #include "GUI/ImGui/ImGuiApplication.h"
@@ -50,7 +51,7 @@ namespace IGA {
 
 
     template <size_t S, size_t S2>
-    void resizeControlWindow(std::array<IGWidget::Button*, S>& buttons, std::array<IGWidget::TextInputWithHint*, S2>& textInputs, IGWidget::ComboBox& compilerCombo)
+    void resizeControlWindow(std::array<IGWidget::Button*, S>& buttons, std::array<IGWidget::TextInputWithHint*, S2>& textInputs, IGWidget::ComboBox& compilerCombo, int selectedBinaryFormat)
     {
         static const ImVec2 window_pos(0.f, 0.f);
         std::pair<float, float> window_size = IGW::g_Window->getSize();
@@ -58,7 +59,7 @@ namespace IGA {
         ImGui::SetNextWindowSize(ws);
         ImGui::SetNextWindowPos(window_pos);
 
-        float btn_offset = ((ws.y - (textInputs.size() * IGWidget::sg_ButtonSize.y)) / (textInputs.size() + 1)) + IGWidget::sg_ButtonSize.y;
+        float btn_offset = ((ws.y - ((textInputs.size()) * IGWidget::sg_ButtonSize.y)) / ((textInputs.size() + 1))) + IGWidget::sg_ButtonSize.y;
         float offset = btn_offset;
         for (size_t i = 0; i < buttons.size(); ++i)
         {
@@ -107,7 +108,7 @@ namespace IGA {
 
         ImGui::SetNextWindowBgAlpha(1.f);
         if (IGW::g_Window->hasResized())
-            resizeControlWindow(buttons, textInputs, compilerCombo);
+            resizeControlWindow(buttons, textInputs, compilerCombo, cwi->selectedBinaryFormat);
 
         ImGui::Begin("ControlWindow", (bool*)0, IMGUI_WINDOW_FLAGS);
 
@@ -120,8 +121,9 @@ namespace IGA {
 
         if (selectedMakeFileOutputPath && makeFileOutputPath.input != "")
         {
-            if(outputFileName.added())
-            { }
+            if (outputFileName.added())
+            {
+            }
 
             if (makeFileOutputPath.added())
             {
@@ -208,37 +210,51 @@ namespace IGA {
             ImGui::SetNextWindowPos({ 0.f, (window_size.second / 2.f) });
         }
         static int selectedBinaryFormat = 0;
+        static std::string dllFileName;
 
         ImGui::Begin("FileViewControl", (bool*)0, IMGUI_WINDOW_FLAGS);
         if (ImGui::Button("Generate"))
         {
             FH::FileEntryVec& fileEntries = FH::getFileEntriesRef();
-            MG::GenerateMakeFile({ *cwi->selectedCompiler, *cwi->ccompilerFlags,
+            MG::GenerateMakeFile({ *cwi->selectedCompiler, *cwi->usePIL, *cwi->ccompilerFlags,
                 * cwi->cppcompilerFlags,
                 *cwi->linkLibraries, *cwi->makeFileOutput,
                 *cwi->outputDir, *cwi->includeDirs,
-                *cwi->libraryDirs, fileEntries, selectedBinaryFormat, *cwi->outFileName });
+                *cwi->libraryDirs, fileEntries, selectedBinaryFormat, dllFileName, *cwi->outFileName });
         }
 
         ImGui::SameLine(100.f);
         ImGui::PushItemWidth(150.f);
-        if(ImGui::Combo("##SelectBinaryFormat", &selectedBinaryFormat,"Application\0Static library\0Dynamic library\0"))
-        { }
+        ImGui::Combo("##SelectBinaryFormat", &selectedBinaryFormat, "Application\0Static library\0Dynamic library\0");
 
         static bool selectAllChecked = false;
-        ImGui::SameLine(265.f);
+        ImGui::SameLine(430.f);
         if (ImGui::Checkbox("Select all", &selectAllChecked))
-        {
             FH::setSelectAllEntries(selectAllChecked);
-        }
-        
-        ImGui::SameLine(375.f);
+
+        ImGui::SameLine(540.f);
         if (ImGui::Button("Delete selected"))
             FH::deleteSelectedEntries();
-        
-        ImGui::SameLine(515.f);
+
+        ImGui::SameLine(680.f);
         if (ImGui::Button("undo"))
             FH::undoLastDelete(selectAllChecked);
+
+        static bool usePIL = true;
+        ImGui::SameLine(740.f);
+        // Position independent linking
+        ImGui::Checkbox("Use PIL", &usePIL);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Position independent linking");
+        cwi->usePIL = &usePIL;
+
+
+        if (selectedBinaryFormat == MG::BuildModes::DynamicLibrary)
+        {
+            ImGui::SameLine(265.f);
+            ImGui::PushItemWidth(150.f);
+            ImGui::InputTextWithHint("##DllFileName", "lib file name", &dllFileName, ImGuiInputTextFlags_AllowTabInput);
+        }
 
         ImGui::End();
     }

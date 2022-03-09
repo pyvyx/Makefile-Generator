@@ -2,7 +2,6 @@
 
 #include "ImGui/imgui.h"
 
-
 namespace IGWidget {
 
     class TextInputWithHint
