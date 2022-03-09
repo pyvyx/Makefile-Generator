@@ -33,7 +33,7 @@ namespace IGW {
 		void imGuiRender() const;
 	};
 
-	extern Window* g_Window;
+	Window* GetWindowPtr();
 	void StartWindow();
 }
 // Poll and handle events (inputs, window resize, etc.)

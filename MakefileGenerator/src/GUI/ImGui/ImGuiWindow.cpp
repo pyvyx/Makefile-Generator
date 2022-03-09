@@ -14,7 +14,6 @@
 
 namespace IGW {
 
-    Window* g_Window = nullptr;
     static char sg_WindowEventHappened = 0;
 
     //public
@@ -48,11 +47,13 @@ namespace IGW {
         stbi_image_free(icon_s.pixels);
 
         // set window pointer and callbacks
-        g_Window = this;
+        Window* window = GetWindowPtr();
+        *window = *this;
+
         glfwSetCursorPosCallback      (m_Window, [](GLFWwindow*, double, double)        { sg_WindowEventHappened = 2; });
         glfwSetMouseButtonCallback    (m_Window, [](GLFWwindow*, int, int, int)         { sg_WindowEventHappened = 2; });
         glfwSetKeyCallback            (m_Window, [](GLFWwindow*, int, int, int, int)    { sg_WindowEventHappened = 2; });
-        glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow*, int width,int height ) { glViewport(0, 0, width, height); g_Window->resized(true); sg_WindowEventHappened = 2; });
+        glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow*, int width, int height) { glViewport(0, 0, width, height); Window* window = GetWindowPtr(); window->resized(true); sg_WindowEventHappened = 2; });
         
         glfwMakeContextCurrent(m_Window);
         glfwSwapInterval(1); // Enable vsync
@@ -86,8 +87,6 @@ namespace IGW {
 
         ImGuiIO& io = ImGui::GetIO();
         io.Fonts->AddFontFromMemoryCompressedTTF(sg_ArialCompressedData, sg_ArialCompressedSize, 19);
-        //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.IniFilename = iniFileName;
 
         ImGuiStyle& style = ImGui::GetStyle();
@@ -112,16 +111,20 @@ namespace IGW {
     {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
 
-        // for multiple viewports
-        //ImGuiIO& io = ImGui::GetIO();
-        //if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        //{
-        //	GLFWwindow* backup_current_context = glfwGetCurrentContext();
-        //	ImGui::UpdatePlatformWindows();
-        //	ImGui::RenderPlatformWindowsDefault();
-        //	glfwMakeContextCurrent(backup_current_context);
-        //}
+
+    Window* GetWindowPtr()
+    {
+        // implement (sizeof(Window), std::nothrow)
+        static Window* window = (Window*)::operator new(sizeof(Window));
+        return window;
+    }
+
+
+    void FreeWindowPtr()
+    {
+        ::operator delete(GetWindowPtr());
     }
 
 
@@ -149,5 +152,6 @@ namespace IGW {
                 window.waitEvents();
             window.swap();
         }
+        FreeWindowPtr();
     }
 }

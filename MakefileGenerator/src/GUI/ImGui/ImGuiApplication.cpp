@@ -70,7 +70,8 @@ namespace IGA {
     void resizeControlWindow(std::array<IGWidget::Button*, S>& buttons, std::array<IGWidget::TextInputWithHint*, S2>& textInputs, IGWidget::ComboBox& compilerCombo)
     {
         static const ImVec2 window_pos(0.f, 25.f);
-        std::pair<float, float> window_size = IGW::g_Window->getSize();
+        IGW::Window* window = IGW::GetWindowPtr();
+        std::pair<float, float> window_size = window->getSize();
         ImVec2 ws(window_size.first, window_size.second / 2.f - 25.f);
         ImGui::SetNextWindowSize(ws);
         ImGui::SetNextWindowPos(window_pos);
@@ -123,7 +124,8 @@ namespace IGA {
         static std::array<IGWidget::TextInputWithHint*, 9> textInputs = { &searchInput, &libraryDirsInput, &includeDirsInput, &outputDir, &makeFileOutputPath, &libraryInput, &cppcompilerFlagsInput, &ccompilerFlagsInput, &outputFileName };
 
         ImGui::SetNextWindowBgAlpha(1.f);
-        if (IGW::g_Window->hasResized())
+        IGW::Window* window = IGW::GetWindowPtr();
+        if (window->hasResized())
             resizeControlWindow(buttons, textInputs, compilerCombo);
 
         ImGui::Begin("ControlWindow", (bool*)0, IMGUI_WINDOW_FLAGS);
@@ -133,7 +135,6 @@ namespace IGA {
         if (selectMakeFileOutputPath.clicked())
         {
             if(FileDialog::FolderSelectionDialog(nullptr, &makeFileOutputPath.input, true))
-            //if (FileDialog::HandleFileDialog(FOLDER_SELECT_DIALOG, nullptr, &makeFileOutputPath.input, true))
                 selectedMakeFileOutputPath = true;
         }
 
@@ -201,9 +202,10 @@ namespace IGA {
     void createFileViewControl(ControlWindowInfo* cwi)
     {
         ImGui::SetNextWindowBgAlpha(1.f);
-        if (IGW::g_Window->hasResized())
+        IGW::Window* window = IGW::GetWindowPtr();
+        if (window->hasResized())
         {
-            std::pair<float, float> window_size = IGW::g_Window->getSize();
+            std::pair<float, float> window_size = window->getSize();
             ImVec2 ws(window_size.first, sg_FileViewControlHight);
             ImGui::SetNextWindowSize(ws);
             ImGui::SetNextWindowPos({ 0.f, (window_size.second / 2.f) });
@@ -286,11 +288,13 @@ namespace IGA {
 
     void createFileView()
     {
+        // make the background non transparent
         ImGui::SetNextWindowBgAlpha(1.f);
-        if (IGW::g_Window->hasResized())
+        IGW::Window* window = IGW::GetWindowPtr();
+        if (window->hasResized())
         {
-            std::pair<float, float> window_size = IGW::g_Window->getSize();
-            IGW::g_Window->resized(false);
+            std::pair<float, float> window_size = window->getSize();
+            window->resized(false);
             ImVec2 ws(window_size.first, (window_size.second / 2.f) - sg_FileViewControlHight);
             ImGui::SetNextWindowSize(ws);
             ImGui::SetNextWindowPos({ 0.f, ws.y + 90.f });
