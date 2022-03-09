@@ -340,7 +340,7 @@ namespace MG {
 		fd.buildMode = info.selectedBinaryFormat;
 		fd.rawOutFileName = info.outFileName;
 		
-		MakeFileVariable outFileDll("$(DLLLIB)", "DLLLIB", info.dllFileName == "" ? "MyOutputDll" : info.dllFileName);
+		MakeFileVariable outFileDll("$(SHAREDLIB)", "SHAREDLIB", info.dllFileName == "" ? "MyOutputDll" : info.dllFileName);
 		if (info.selectedBinaryFormat == BuildModes::DynamicLibrary)
 		{
 			fd.outFileDll = &outFileDll;
