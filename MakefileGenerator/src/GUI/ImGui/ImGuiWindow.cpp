@@ -125,12 +125,11 @@ namespace IGW {
     }
 
 
-    void startWindow()
+    void StartWindow()
     {
         IGW::Window window;
         window.imGuiInit(NULL);
 
-        //IGA::fillTestVector();
 
         // Main loop
         while (window.isOpen())
@@ -138,7 +137,7 @@ namespace IGW {
             window.clear();
             window.imGuiStartFrame();
 
-            IGA::startApplication();
+            IGA::StartApplication();
 
             //ImGui::ShowDemoWindow();
             window.imGuiRender();

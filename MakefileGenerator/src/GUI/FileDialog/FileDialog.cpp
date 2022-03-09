@@ -1,38 +1,44 @@
+#include <string>
+
 #include "nfd/nfd.h"
 
 #include "FileDialog.h"
 #include "FileHandler.h"
 
+#include "Debug.h"
+
 namespace FileDialog {
 
-    bool multiFileDialog(std::string* base_str)
+    bool MultiFileDialog(std::string* base_str)
     {
         nfdpathset_t pathSet;
-        nfdresult_t result = NFD_OpenDialogMultiple("", NULL, &pathSet);
+        nfdresult_t result = NFD_OpenDialogMultiple("", base_str->c_str(), &pathSet);
         if (result == NFD_OKAY)
         {
             for (size_t i = 0; i < NFD_PathSet_GetCount(&pathSet); ++i)
             {
                 nfdchar_t* path = NFD_PathSet_GetPath(&pathSet, i);
-                FH::addEntry(FH::getRelativePath(*base_str, path));
+                FH::AddEntry(FH::GetRelativePath(base_str, path));
             }
             NFD_PathSet_Free(&pathSet);
             return true;
         }
+        // pressed cancel
         else if (result == NFD_CANCEL)
         {
+            DEBUG_PRINT_NL("[NFD][INFO] User pressed cancel (MultiFileDialog)")
             return false;
-            //puts("User pressed cancel.");
         }
+        // error opening the file
         else
         {
-            printf("Error opening multi file dialog: %s\n", NFD_GetError());
+            DEBUG_PRINT_NL("[NFD][Error] Error opening mulitple file dialog " << NFD_GetError())
             return false;
         }
     }
 
 
-    bool folderSelectionDialog(std::string* base_str, std::string* str, bool single_str)
+    bool FolderSelectionDialog(std::string* base_str, std::string* str, bool single_str)
     {
         nfdchar_t* outPath = NULL;
         nfdresult_t result = NFD_PickFolder(NULL, &outPath);
@@ -43,23 +49,14 @@ namespace FileDialog {
                 if (base_str == nullptr)
                     *str = outPath;
                 else
-                {
-                    if (*base_str == outPath) {}
-                        //*str = *base_str;{}
-                    else
-                        *str = FH::getRelativePath(*base_str, outPath);
-                }
+                    if (*base_str != outPath)
+                        *str = FH::GetRelativePath(base_str, outPath);
             }
             else
             {
-                if (*base_str == outPath)
+                if (*base_str != outPath)
                 {
-                    //str->append(*base_str);
-                    //str->append(";");
-                }
-                else
-                {
-                    str->append(FH::getRelativePath(*base_str, outPath));
+                    str->append(FH::GetRelativePath(base_str, outPath));
                     str->append(";");
                 }
             }
@@ -67,27 +64,16 @@ namespace FileDialog {
             free(outPath);
             return true;
         }
+        // pressed cancel
         else if (result == NFD_CANCEL)
         {
+            DEBUG_PRINT_NL("[NFD][INFO] User pressed cancel (FolderSelectionDialog)")
             return false;
         }
+        // error opening the file
         else
         {
-            printf("Error opening folder selection dialog: %s\n", NFD_GetError());
-            return false;
-        }
-    }
-
-
-    bool handleFileDialog(char dialog, std::string* base_str, std::string* str, bool single_str)
-    {
-        switch (dialog)
-        {
-        case MULTIPLE_FILE_DIALOG:
-            return multiFileDialog(base_str);
-        case FOLDER_SELECT_DIALOG:
-            return folderSelectionDialog(base_str, str, single_str);
-        default:
+            DEBUG_PRINT_NL("[NFD][Error] Error opening pick folder dialog " << NFD_GetError())
             return false;
         }
     }
@@ -99,17 +85,19 @@ namespace FileDialog {
         nfdresult_t result = NFD_SaveDialog("mg", NULL, &savePath);
         if (result == NFD_OKAY)
         {
-            std::string resultStr = savePath;
+            std::string filePath = savePath;
             free(savePath);
-            return resultStr;
+            return filePath;
         }
+        // pressed cancel
         else if (result == NFD_CANCEL)
         {
-            puts("User pressed cancel.");
+            DEBUG_PRINT_NL("[NFD][INFO] User pressed cancel (SaveFileDialog)")
         }
+        // error opening the file
         else
         {
-            printf("Error: %s\n", NFD_GetError());
+            DEBUG_PRINT_NL("[NFD][Error] Error opening save file dialog" << NFD_GetError())
         }
         return "";
     }
@@ -121,17 +109,19 @@ namespace FileDialog {
         nfdresult_t result = NFD_OpenDialog("", NULL, &outPath);
         if (result == NFD_OKAY)
         {
-            std::string path = outPath;
+            std::string filePath = outPath;
             free(outPath);
-            return path;
+            return filePath;
         }
+        // pressed cancel
         else if (result == NFD_CANCEL)
         {
-            puts("User pressed cancel.");
+            DEBUG_PRINT_NL("[NFD][INFO] User pressed cancel (FileSelectionDialog)")
         }
+        // error opening the file
         else
         {
-            printf("Error: %s\n", NFD_GetError());
+            DEBUG_PRINT_NL("[NFD][Error] Error opening file selection dialog" << NFD_GetError())
         }
         return "";
     }

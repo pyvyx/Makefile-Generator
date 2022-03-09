@@ -23,7 +23,23 @@
 // using ImGui --------------------------------------------------------
 namespace IGA {
 
-    void startApplication()
+    template<size_t S>
+    void PushStyleColors(const std::array<IGWidget::WidgetColor, S>& colorFlags)
+    {
+        for (size_t i = 0; i < colorFlags.size(); ++i)
+            ImGui::PushStyleColor(colorFlags[i].colorFlag, *colorFlags[i].color);
+    }
+
+
+    template<size_t S>
+    void PopStyleColors(const std::array<IGWidget::WidgetColor, S>& colorFlags)
+    {
+        for (size_t i = 0; i < colorFlags.size(); ++i)
+            ImGui::PopStyleColor();
+    }
+
+
+    void StartApplication()
     {
         // for styling
         static const ImVec4 s_DarkerColor  (0.27f, 0.27f, 0.27f, 1.0f);
@@ -42,16 +58,16 @@ namespace IGA {
         };
         static ControlWindowInfo cwi;
 
-        pushStyleColor(styleColors);
+        PushStyleColors(styleColors);
         createControlWindow(&cwi);
         createFileViewControl(&cwi);
         createFileView();
-        popStyleColor(styleColors);
+        PopStyleColors(styleColors);
     }
 
 
     template <size_t S, size_t S2>
-    void resizeControlWindow(std::array<IGWidget::Button*, S>& buttons, std::array<IGWidget::TextInputWithHint*, S2>& textInputs, IGWidget::ComboBox& compilerCombo, int selectedBinaryFormat)
+    void resizeControlWindow(std::array<IGWidget::Button*, S>& buttons, std::array<IGWidget::TextInputWithHint*, S2>& textInputs, IGWidget::ComboBox& compilerCombo)
     {
         static const ImVec2 window_pos(0.f, 25.f);
         std::pair<float, float> window_size = IGW::g_Window->getSize();
@@ -108,7 +124,7 @@ namespace IGA {
 
         ImGui::SetNextWindowBgAlpha(1.f);
         if (IGW::g_Window->hasResized())
-            resizeControlWindow(buttons, textInputs, compilerCombo, cwi->selectedBinaryFormat);
+            resizeControlWindow(buttons, textInputs, compilerCombo);
 
         ImGui::Begin("ControlWindow", (bool*)0, IMGUI_WINDOW_FLAGS);
 
@@ -116,73 +132,55 @@ namespace IGA {
         static bool selectedMakeFileOutputPath = false;
         if (selectMakeFileOutputPath.clicked())
         {
-            if (FileDialog::handleFileDialog(FOLDER_SELECT_DIALOG, nullptr, &makeFileOutputPath.input, true))
+            if(FileDialog::FolderSelectionDialog(nullptr, &makeFileOutputPath.input, true))
+            //if (FileDialog::HandleFileDialog(FOLDER_SELECT_DIALOG, nullptr, &makeFileOutputPath.input, true))
                 selectedMakeFileOutputPath = true;
         }
 
         if (selectedMakeFileOutputPath && makeFileOutputPath.input != "")
         {
-            if (outputFileName.added())
-            {
-            }
-
-            if (makeFileOutputPath.added())
-            {
-            }
+            outputFileName.added();
+            makeFileOutputPath.added();
 
             // binary output directory
             if (selectOutputDir.clicked())
             {
-                FileDialog::handleFileDialog(FOLDER_SELECT_DIALOG, &makeFileOutputPath.input, &outputDir.input, true);
+                FileDialog::FolderSelectionDialog(&makeFileOutputPath.input, &outputDir.input, true);
             }
-
-            if (outputDir.added())
-            {
-            }
+            outputDir.added();
 
             // compiler combo box
-            if (compilerCombo.Selected())
-            {
-            }
+            compilerCombo.Selected();
 
-            if (ccompilerFlagsInput.added())
-            { }
-
-            if (cppcompilerFlagsInput.added())
-            {
-            }
+            // compiler flags
+            ccompilerFlagsInput.added();
+            cppcompilerFlagsInput.added();
 
             // include directories
             if (selectIncludeDirs.clicked())
             {
-                FileDialog::handleFileDialog(FOLDER_SELECT_DIALOG, &makeFileOutputPath.input, &includeDirsInput.input);
+                FileDialog::FolderSelectionDialog(&makeFileOutputPath.input, &includeDirsInput.input, false);
             }
-
-            if (includeDirsInput.added())
-            { }
+            includeDirsInput.added();
 
             // link libraries
-            if (libraryInput.added())
-            { }
+            libraryInput.added();
 
             // library directories
             if (selectLibraryDirs.clicked())
             {
-                FileDialog::handleFileDialog(FOLDER_SELECT_DIALOG, &makeFileOutputPath.input, &libraryDirsInput.input);
+                FileDialog::FolderSelectionDialog(&makeFileOutputPath.input, &libraryDirsInput.input, false);
             }
-
-            if (libraryDirsInput.added())
-            {
-            }
+            libraryDirsInput.added();
 
             // files
             if (selectFiles.clicked())
             {
-                FileDialog::handleFileDialog(MULTIPLE_FILE_DIALOG, &makeFileOutputPath.input, nullptr);
+                FileDialog::MultiFileDialog(&makeFileOutputPath.input);
             }
 
             if (searchInput.added())
-                FH::filterFileEntries(searchInput.input);
+                FH::FilterFileEntries(searchInput.input);
         }
 
         cwi->selectedCompiler = &compilerCombo.selected;
@@ -217,7 +215,7 @@ namespace IGA {
         ImGui::Begin("FileViewControl", (bool*)0, IMGUI_WINDOW_FLAGS);
         if (ImGui::Button("Generate"))
         {
-            FH::FileEntryVec& fileEntries = FH::getFileEntriesRef();
+            FH::FileEntryVec& fileEntries = FH::GetFileEntriesRef();
             MG::GenerateMakeFile({ *cwi->selectedCompiler, *cwi->usePIL, *cwi->ccompilerFlags,
                 * cwi->cppcompilerFlags,
                 *cwi->linkLibraries, *cwi->makeFileOutput,
@@ -233,7 +231,7 @@ namespace IGA {
             std::string filePath = FileDialog::SaveFileDialog();
             if (filePath != "")
             {
-                FH::FileEntryVec& fileEntries = FH::getFileEntriesRef();
+                FH::FileEntryVec& fileEntries = FH::GetFileEntriesRef();
                 MG::SaveConfigFile({ *cwi->selectedCompiler, *cwi->usePIL, *cwi->ccompilerFlags,
                     *cwi->cppcompilerFlags,
                     *cwi->linkLibraries, *cwi->makeFileOutput,
@@ -256,15 +254,15 @@ namespace IGA {
 
         ImGui::SameLine(430.f);
         if (ImGui::Checkbox("Select all", &selectAllChecked))
-            FH::setSelectAllEntries(selectAllChecked);
+            FH::SetSelectAllEntries(selectAllChecked);
 
         ImGui::SameLine(540.f);
         if (ImGui::Button("Delete selected"))
-            FH::deleteSelectedEntries();
+            FH::DeleteSelectedEntries();
 
         ImGui::SameLine(680.f);
         if (ImGui::Button("undo"))
-            FH::undoLastDelete(selectAllChecked);
+            FH::UndoLastDelete(selectAllChecked);
 
         static bool usePIL = true;
         ImGui::SameLine(740.f);
@@ -286,14 +284,6 @@ namespace IGA {
     }
 
 
-    static const int MAX = 100;
-    void fillTestVector()
-    {
-        //static FH::FileEntryVec& entries = FH::getFileEntriesRef();
-        //for (int i = 0; i < MAX; ++i)
-        //    entries.push_back("File" + std::to_string(i));
-    }
-
     void createFileView()
     {
         ImGui::SetNextWindowBgAlpha(1.f);
@@ -305,7 +295,7 @@ namespace IGA {
             ImGui::SetNextWindowSize(ws);
             ImGui::SetNextWindowPos({ 0.f, ws.y + 90.f });
         }
-        static FH::FileEntryVec& fileEntries = FH::getFileEntriesRef();
+        static FH::FileEntryVec& fileEntries = FH::GetFileEntriesRef();
         size_t fileEntriesSize = fileEntries.size();
 
         ImGui::Begin("FileView", (bool*)0, IMGUI_WINDOW_FLAGS);

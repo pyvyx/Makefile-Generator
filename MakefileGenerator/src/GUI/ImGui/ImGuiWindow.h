@@ -34,7 +34,7 @@ namespace IGW {
 	};
 
 	extern Window* g_Window;
-	void startWindow();
+	void StartWindow();
 }
 // Poll and handle events (inputs, window resize, etc.)
 // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
