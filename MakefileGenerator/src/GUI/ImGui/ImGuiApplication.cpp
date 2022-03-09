@@ -53,9 +53,9 @@ namespace IGA {
     template <size_t S, size_t S2>
     void resizeControlWindow(std::array<IGWidget::Button*, S>& buttons, std::array<IGWidget::TextInputWithHint*, S2>& textInputs, IGWidget::ComboBox& compilerCombo, int selectedBinaryFormat)
     {
-        static const ImVec2 window_pos(0.f, 0.f);
+        static const ImVec2 window_pos(0.f, 25.f);
         std::pair<float, float> window_size = IGW::g_Window->getSize();
-        ImVec2 ws(window_size.first, window_size.second / 2.f);
+        ImVec2 ws(window_size.first, window_size.second / 2.f - 25.f);
         ImGui::SetNextWindowSize(ws);
         ImGui::SetNextWindowPos(window_pos);
 
@@ -111,6 +111,7 @@ namespace IGA {
             resizeControlWindow(buttons, textInputs, compilerCombo, cwi->selectedBinaryFormat);
 
         ImGui::Begin("ControlWindow", (bool*)0, IMGUI_WINDOW_FLAGS);
+
 
         static bool selectedMakeFileOutputPath = false;
         if (selectMakeFileOutputPath.clicked())
@@ -210,6 +211,7 @@ namespace IGA {
             ImGui::SetNextWindowPos({ 0.f, (window_size.second / 2.f) });
         }
         static int selectedBinaryFormat = 0;
+        static bool selectAllChecked = false;
         static std::string dllFileName;
 
         ImGui::Begin("FileViewControl", (bool*)0, IMGUI_WINDOW_FLAGS);
@@ -223,11 +225,35 @@ namespace IGA {
                 *cwi->libraryDirs, fileEntries, selectedBinaryFormat, dllFileName, *cwi->outFileName });
         }
 
+
+
+        ImGui::BeginMainMenuBar();
+        if (ImGui::MenuItem("Save configuration"))
+        {
+            std::string filePath = FileDialog::SaveFileDialog();
+            if (filePath != "")
+            {
+                FH::FileEntryVec& fileEntries = FH::getFileEntriesRef();
+                MG::SaveConfigFile({ *cwi->selectedCompiler, *cwi->usePIL, *cwi->ccompilerFlags,
+                    *cwi->cppcompilerFlags,
+                    *cwi->linkLibraries, *cwi->makeFileOutput,
+                    *cwi->outputDir, *cwi->includeDirs,
+                    *cwi->libraryDirs, fileEntries, selectedBinaryFormat, dllFileName, *cwi->outFileName }, filePath, selectAllChecked);
+            }
+        }
+        if (ImGui::MenuItem("Load configuration"))
+        {
+            std::string filePath = FileDialog::FileSelectionDialog();
+            MG::LoadConfigFile(filePath);
+        }
+        ImGui::EndMainMenuBar();
+
+
+
         ImGui::SameLine(100.f);
         ImGui::PushItemWidth(150.f);
         ImGui::Combo("##SelectBinaryFormat", &selectedBinaryFormat, "Application\0Static library\0Dynamic library\0");
 
-        static bool selectAllChecked = false;
         ImGui::SameLine(430.f);
         if (ImGui::Checkbox("Select all", &selectAllChecked))
             FH::setSelectAllEntries(selectAllChecked);

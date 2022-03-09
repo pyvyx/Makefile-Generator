@@ -349,4 +349,93 @@ namespace MG {
 
 		WriteMakeFile(fd, info.makeFileOutput, info.files);
 	}
+
+
+	void SaveConfigFile(GeneratorInfo info, const std::string& file_path, bool selectedAll)
+	{
+		std::ofstream configFile(file_path);
+		configFile << info.outFileName << '\n';
+		configFile << info.selectedCompiler << '\n';
+		configFile << info.ccompilerFlags << '\n';
+		configFile << info.cppcompilerFlags << '\n';
+		configFile << info.linkLibraries << '\n';
+		configFile << info.makeFileOutput << '\n';
+		configFile << info.outputDir << '\n';
+		configFile << info.includeDirs << '\n';
+		configFile << info.libraryDirs << '\n';
+		configFile << info.selectedBinaryFormat << '\n';
+		if (info.selectedBinaryFormat == BuildModes::DynamicLibrary)
+		{
+			configFile << info.dllFileName << '\n';
+		}
+		configFile << selectedAll << '\n';
+		configFile << info.usePIL << '\n';
+		
+		for (size_t i = 0; i < info.files.size(); ++i)
+		{
+			if(!info.files[i].isDeleted())
+				configFile << info.files[i].fileName() << "|" << info.files[i].extension() << '\n';
+		}
+		configFile.close();
+	}
+
+
+	void LoadConfigFile(const std::string& file_path)
+	{
+		GeneratorInfo info;
+		std::ifstream configFile(file_path);
+		std::string line;
+		size_t counter = 0;
+		bool selectedAll;
+
+		// add exception handling
+		while (std::getline(configFile, line))
+		{
+			switch (counter)
+			{
+			case 0:
+				info.outFileName = line;
+				break;
+			case 1:
+				info.selectedCompiler = std::stoi(line);
+				break;
+			case 2:
+				info.ccompilerFlags = line;
+				break;
+			case 3:
+				info.cppcompilerFlags = line;
+				break;
+			case 4:
+				info.linkLibraries = line;
+				break;
+			case 5:
+				info.makeFileOutput = line;
+				break;
+			case 6:
+				info.outputDir = line;
+				break;
+			case 7:
+				info.includeDirs = line;
+				break;
+			case 8:
+				info.libraryDirs = line;
+				break;
+			case 9:
+				info.selectedBinaryFormat = std::stoi(line);
+				break;
+			case 10:
+				selectedAll = std::stoi(line);
+				break;
+			case 11:
+				info.usePIL = std::stoi(line);
+				break;
+			default:
+				std::vector<std::string> file_with_extension = splitStringByChar(line, '|');
+				info.files.push_back({ file_with_extension[0], file_with_extension[1] });
+				break;
+			}
+		}
+
+		configFile.close();
+	}
 }

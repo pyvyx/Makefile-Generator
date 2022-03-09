@@ -55,4 +55,6 @@ namespace MG {
     };
 
     void GenerateMakeFile(GeneratorInfo info);
+    void SaveConfigFile(GeneratorInfo info, const std::string& file_path, bool selectedAll);
+    void LoadConfigFile(const std::string& file_path);
 }

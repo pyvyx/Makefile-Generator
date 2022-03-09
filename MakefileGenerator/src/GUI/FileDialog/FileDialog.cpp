@@ -92,4 +92,47 @@ namespace FileDialog {
         }
     }
 
+
+    std::string SaveFileDialog()
+    {
+        nfdchar_t* savePath = NULL;
+        nfdresult_t result = NFD_SaveDialog("mg", NULL, &savePath);
+        if (result == NFD_OKAY)
+        {
+            std::string resultStr = savePath;
+            free(savePath);
+            return resultStr;
+        }
+        else if (result == NFD_CANCEL)
+        {
+            puts("User pressed cancel.");
+        }
+        else
+        {
+            printf("Error: %s\n", NFD_GetError());
+        }
+        return "";
+    }
+
+
+    std::string FileSelectionDialog()
+    {
+        nfdchar_t* outPath = NULL;
+        nfdresult_t result = NFD_OpenDialog("", NULL, &outPath);
+        if (result == NFD_OKAY)
+        {
+            std::string path = outPath;
+            free(outPath);
+            return path;
+        }
+        else if (result == NFD_CANCEL)
+        {
+            puts("User pressed cancel.");
+        }
+        else
+        {
+            printf("Error: %s\n", NFD_GetError());
+        }
+        return "";
+    }
 }
