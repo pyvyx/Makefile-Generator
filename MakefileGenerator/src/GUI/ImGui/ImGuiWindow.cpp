@@ -11,7 +11,6 @@
 #include "GUI/Icon.h"
 #include "GUI/Arial.h"
 
-
 namespace IGW {
 
     static char sg_WindowEventHappened = 0;
@@ -21,7 +20,7 @@ namespace IGW {
         : m_Window(nullptr)
     {
         glfwSetErrorCallback([](int error, const char* description){ fprintf(stderr, "Glfw Error %d: %s\n", error, description); });
-        
+
         if (!glfwInit())
         {
             std::cout << "[ERROR] Glfw Init failed\n";
@@ -116,8 +115,10 @@ namespace IGW {
 
     Window* GetWindowPtr()
     {
-        // implement (sizeof(Window), std::nothrow)
+        // implement (sizeof(Window, std::nothrow)
         static Window* window = (Window*)::operator new(sizeof(Window));
+        //if (window == nullptr)
+        //    { } // inform the user and exit program
         return window;
     }
 
@@ -127,6 +128,10 @@ namespace IGW {
         ::operator delete(GetWindowPtr());
     }
 
+    void test(int a)
+    {
+        std::cout << 1 + a << std::endl;
+    }
 
     void StartWindow()
     {

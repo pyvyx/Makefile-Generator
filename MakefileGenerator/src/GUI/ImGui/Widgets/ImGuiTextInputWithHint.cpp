@@ -28,6 +28,15 @@ namespace IGWidget {
         return ImGui::InputTextWithHint(m_Label, m_Hint, &input, ImGuiInputTextFlags_AllowTabInput);
     }
 
+    bool TextInputWithHint::Added(float sameLineOffset, float width)
+    {
+        ImGui::SameLine(sameLineOffset);
+        ImGui::PushItemWidth(width);
+        return ImGui::InputTextWithHint(m_Label, m_Hint, &input, ImGuiInputTextFlags_AllowTabInput);
+    }
+
+    std::string& TextInputWithHint::Input() { return input; }
+
     void TextInputWithHint::resetPosSize(const ImVec2& ws, float y_offset)
     {
         // set text input position

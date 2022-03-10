@@ -22,6 +22,15 @@ namespace IGWidget {
         return ImGui::Combo(label, &selected, items);
     }
 
+    bool ComboBox::Selected(float sameLineOffset, float width)
+    {
+        ImGui::SameLine(sameLineOffset);
+        ImGui::PushItemWidth(width);
+        return ImGui::Combo(label, &selected, items);
+    }
+
+    int ComboBox::SelectedItem() { return selected; }
+
     void ComboBox::resetPosSize(const ImVec2& ws, float y_offset)
     {
         // set combo box pos

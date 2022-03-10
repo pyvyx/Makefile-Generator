@@ -8,10 +8,12 @@
 #include "GUI/ImGui/ImGuiApplication.h"
 #include "GUI/ImGui/ImGuiWindow.h"
 #include "GUI/FileDialog/FileDialog.h"
+#include "GUI/ImGui/ImGuiContext.h"
 // Gui widgets
 #include "GUI/ImGui/Widgets/ImGuiButton.h"
 #include "GUI/ImGui/Widgets/ImGuiTextInputWithHint.h"
 #include "GUI/ImGui/Widgets/ImGuiComboBox.h"
+#include "GUI/ImGui/Widgets/ImGuiCheckBox.h"
 #include "GUI/ImGui/Widgets/ImGuiSizeProperties.h"
 
 #include "FileHandler.h"
@@ -65,34 +67,45 @@ namespace IGA {
         PopStyleColors(styleColors);
     }
 
-
     template <size_t S, size_t S2>
-    void resizeControlWindow(std::array<IGWidget::Button*, S>& buttons, std::array<IGWidget::TextInputWithHint*, S2>& textInputs, IGWidget::ComboBox& compilerCombo)
+    struct ControlWindowWidgets
     {
-        static const ImVec2 window_pos(0.f, 25.f);
-        IGW::Window* window = IGW::GetWindowPtr();
-        std::pair<float, float> window_size = window->getSize();
-        ImVec2 ws(window_size.first, window_size.second / 2.f - 25.f);
-        ImGui::SetNextWindowSize(ws);
-        ImGui::SetNextWindowPos(window_pos);
+        std::array<IGWidget::Button*, S> buttons;
+        std::array<IGWidget::TextInputWithHint*, S2> textInputs;
+        IGWidget::ComboBox compilerCombo;
+    };
 
-        float btn_offset = ((ws.y - ((textInputs.size()) * IGWidget::sg_ButtonSize.y)) / ((textInputs.size() + 1))) + IGWidget::sg_ButtonSize.y;
-        float offset = btn_offset;
-        for (size_t i = 0; i < buttons.size(); ++i)
-        {
-            buttons[i]->resetPosSize(ws, offset);
-            offset += btn_offset;
-        }
-        compilerCombo.resetPosSize(ws, offset + btn_offset - IGWidget::sg_TextInputYOffset);
+    //template <size_t S, size_t S2>
+    //void resizeControlWindow(std::array<IGWidget::Button*, S>& buttons, std::array<IGWidget::TextInputWithHint*, S2>& textInputs, IGWidget::ComboBox& compilerCombo)
+    //{
+    //    static const ImVec2 window_pos(0.f, 25.f);
+    //    IGW::Window* window = IGW::GetWindowPtr();
+    //    std::pair<float, float> window_size = window->getSize();
+    //    ImVec2 ws(window_size.first, window_size.second / 2.f - 25.f);
+    //    ImGui::SetNextWindowSize(ws);
+    //    ImGui::SetNextWindowPos(window_pos);
+    //
+    //    float btn_offset = ((ws.y - ((textInputs.size()) * IGWidget::sg_ButtonSize.y)) / ((textInputs.size() + 1))) + IGWidget::sg_ButtonSize.y;
+    //    float offset = btn_offset;
+    //    for (size_t i = 0; i < buttons.size(); ++i)
+    //    {
+    //        buttons[i]->resetPosSize(ws, offset);
+    //        offset += btn_offset;
+    //    }
+    //    compilerCombo.resetPosSize(ws, offset + btn_offset - IGWidget::sg_TextInputYOffset);
+    //
+    //    offset = btn_offset - IGWidget::sg_TextInputYOffset;
+    //    for (size_t i = 0; i < textInputs.size(); ++i)
+    //    {
+    //        textInputs[i]->resetPosSize(ws, offset);
+    //        offset += btn_offset;
+    //    }
+    //}
 
-        offset = btn_offset - IGWidget::sg_TextInputYOffset;
-        for (size_t i = 0; i < textInputs.size(); ++i)
-        {
-            textInputs[i]->resetPosSize(ws, offset);
-            offset += btn_offset;
-        }
+    void resizeControlWindow(ControlWindowWidgets<6,9> cw)
+    {
+
     }
-
 
     void createControlWindow(ControlWindowInfo* cwi)
     {
@@ -123,10 +136,18 @@ namespace IGA {
         static std::array<IGWidget::Button*, 6> buttons = { &selectFiles, &selectLibraryDirs, &selectIncludeDirs, &selectOutputDir, &selectMakeFileOutputPath, &selectLibraries };
         static std::array<IGWidget::TextInputWithHint*, 9> textInputs = { &searchInput, &libraryDirsInput, &includeDirsInput, &outputDir, &makeFileOutputPath, &libraryInput, &cppcompilerFlagsInput, &ccompilerFlagsInput, &outputFileName };
 
+        static ControlWindowWidgets<6, 9> abc;// (buttons, textInputs, compilerCombo);
+        abc.buttons = buttons;
+        abc.textInputs = textInputs;
+        abc.compilerCombo = compilerCombo;
+
+        static ImGuiContext<ControlWindowWidgets<6,9>> ct("test", [](ControlWindowWidgets<6, 9> cw) { std::cout << 1 << std::endl; }, abc);
+
         ImGui::SetNextWindowBgAlpha(1.f);
         IGW::Window* window = IGW::GetWindowPtr();
         if (window->hasResized())
-            resizeControlWindow(buttons, textInputs, compilerCombo);
+            ct.OnResize();
+            //resizeControlWindow(buttons, textInputs, compilerCombo);
 
         ImGui::Begin("ControlWindow", (bool*)0, IMGUI_WINDOW_FLAGS);
 
@@ -210,9 +231,16 @@ namespace IGA {
             ImGui::SetNextWindowSize(ws);
             ImGui::SetNextWindowPos({ 0.f, (window_size.second / 2.f) });
         }
-        static int selectedBinaryFormat = 0;
-        static bool selectAllChecked = false;
-        static std::string dllFileName;
+
+
+        static IGWidget::Button deleteSelectedFiles("Delete selected");
+        static IGWidget::Button undoButton("Undo");
+
+        static IGWidget::ComboBox selectedBinFormat("##SelectBinaryFormat", "Application\0Static library\0Dynamic library\0");
+        static IGWidget::CheckBox selectAll("Select all");
+        static IGWidget::CheckBox usePIL("Use PIL", true);
+        static IGWidget::TextInputWithHint dllFileNameInput("##DllFileName", "lib file name");
+
 
         ImGui::Begin("FileViewControl", (bool*)0, IMGUI_WINDOW_FLAGS);
         if (ImGui::Button("Generate"))
@@ -222,7 +250,7 @@ namespace IGA {
                 * cwi->cppcompilerFlags,
                 *cwi->linkLibraries, *cwi->makeFileOutput,
                 *cwi->outputDir, *cwi->includeDirs,
-                *cwi->libraryDirs, fileEntries, selectedBinaryFormat, dllFileName, *cwi->outFileName });
+                *cwi->libraryDirs, fileEntries, selectedBinFormat.SelectedItem(), dllFileNameInput.Input(), *cwi->outFileName});
         }
 
 
@@ -238,49 +266,37 @@ namespace IGA {
                     *cwi->cppcompilerFlags,
                     *cwi->linkLibraries, *cwi->makeFileOutput,
                     *cwi->outputDir, *cwi->includeDirs,
-                    *cwi->libraryDirs, fileEntries, selectedBinaryFormat, dllFileName, *cwi->outFileName }, filePath, selectAllChecked);
+                    *cwi->libraryDirs, fileEntries, selectedBinFormat.SelectedItem(), dllFileNameInput.Input(), *cwi->outFileName }, filePath, selectAll.Checked());
             }
         }
         if (ImGui::MenuItem("Load configuration"))
         {
-            std::string filePath = FileDialog::FileSelectionDialog();
-            MG::LoadConfigFile(filePath);
+            //std::string filePath = FileDialog::FileSelectionDialog();
+            //MG::LoadConfigFile(filePath);
         }
         ImGui::EndMainMenuBar();
 
+        
+        selectedBinFormat.Selected(100.f, 150.f);
 
+        if (selectAll.Changed(430.f))
+            FH::SetSelectAllEntries(selectAll.Checked());
 
-        ImGui::SameLine(100.f);
-        ImGui::PushItemWidth(150.f);
-        ImGui::Combo("##SelectBinaryFormat", &selectedBinaryFormat, "Application\0Static library\0Dynamic library\0");
-
-        ImGui::SameLine(430.f);
-        if (ImGui::Checkbox("Select all", &selectAllChecked))
-            FH::SetSelectAllEntries(selectAllChecked);
-
-        ImGui::SameLine(540.f);
-        if (ImGui::Button("Delete selected"))
+        if (deleteSelectedFiles.clicked(540.f))
             FH::DeleteSelectedEntries();
 
-        ImGui::SameLine(680.f);
-        if (ImGui::Button("undo"))
-            FH::UndoLastDelete(selectAllChecked);
-
-        static bool usePIL = true;
-        ImGui::SameLine(740.f);
-        // Position independent linking
-        ImGui::Checkbox("Use PIL", &usePIL);
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Position independent linking");
-        cwi->usePIL = &usePIL;
+        if(undoButton.clicked(680.f))
+            FH::UndoLastDelete(selectAll.Checked());
 
 
-        if (selectedBinaryFormat == MG::BuildModes::DynamicLibrary)
-        {
-            ImGui::SameLine(265.f);
-            ImGui::PushItemWidth(150.f);
-            ImGui::InputTextWithHint("##DllFileName", "lib file name", &dllFileName, ImGuiInputTextFlags_AllowTabInput);
-        }
+        usePIL.Changed(740.f);
+        if (usePIL.IsHovered())
+            usePIL.SetTooltip("Position independent linking");
+        cwi->usePIL = &usePIL.Checked();
+
+
+        if (selectedBinFormat.SelectedItem() == MG::BuildMode::DynamicLibrary)
+            dllFileNameInput.Added(265.f, 150.f);
 
         ImGui::End();
     }

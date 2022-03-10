@@ -21,6 +21,13 @@ namespace IGWidget {
         return ImGui::Button(m_Label, size);
     }
 
+    bool Button::clicked(float sameLineOffset)
+    {
+        ImGui::SameLine(sameLineOffset);
+        return ImGui::Button(m_Label);
+        return false;
+    }
+
     void Button::resetPosSize(const ImVec2& ws, float y_offset)
     {
         // set button pos

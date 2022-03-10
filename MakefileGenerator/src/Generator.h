@@ -47,7 +47,7 @@ namespace MG {
         ClangPP
     };
 
-    enum BuildModes : char
+    enum BuildMode : char
     {
         Application,
         StaticLibrary,

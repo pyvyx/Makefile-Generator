@@ -224,7 +224,7 @@ namespace MG {
 		}
 		target += "\n\t";
 
-		if (fd.buildMode == BuildModes::Application)
+		if (fd.buildMode == BuildMode::Application)
 		{
 			target += fd.cppcompiler.makeVariable + " " + fd.cppcompilerFlags.makeVariable + " ";
 			if(fd.usePIL)
@@ -238,14 +238,14 @@ namespace MG {
 			if (fd.usePIL)
 				target += " " + fd.libraries.makeVariable;
 		}
-		else if (fd.buildMode == BuildModes::StaticLibrary)
+		else if (fd.buildMode == BuildMode::StaticLibrary)
 		{
 			target += "ar rcs " + fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + "";
 			target += " ";
 			for (auto& i : vec)
 				target += i.objfiles.makeVariable + " ";
 		}
-		else if (fd.buildMode == BuildModes::DynamicLibrary)
+		else if (fd.buildMode == BuildMode::DynamicLibrary)
 		{
 			target += fd.cppcompiler.makeVariable + " -shared -Wl,--out-implib," + fd.outFolder.makeVariable 
 				+ "/" + fd.outFileDll->makeVariable + " ";
@@ -341,7 +341,7 @@ namespace MG {
 		fd.rawOutFileName = info.outFileName;
 		
 		MakeFileVariable outFileDll("$(SHAREDLIB)", "SHAREDLIB", info.dllFileName == "" ? "MyOutputDll" : info.dllFileName);
-		if (info.selectedBinaryFormat == BuildModes::DynamicLibrary)
+		if (info.selectedBinaryFormat == BuildMode::DynamicLibrary)
 		{
 			fd.outFileDll = &outFileDll;
 		}
@@ -364,7 +364,7 @@ namespace MG {
 		configFile << info.includeDirs << '\n';
 		configFile << info.libraryDirs << '\n';
 		configFile << info.selectedBinaryFormat << '\n';
-		if (info.selectedBinaryFormat == BuildModes::DynamicLibrary)
+		if (info.selectedBinaryFormat == BuildMode::DynamicLibrary)
 		{
 			configFile << info.dllFileName << '\n';
 		}
