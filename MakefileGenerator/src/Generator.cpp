@@ -257,11 +257,11 @@ namespace MG {
 
 			for (auto& i : vec)
 				target += i.objfiles.makeVariable + " ";
-			target += resFiles.makeVariable;
 			target += " -o " + fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + " ";
 			target += fd.libraryDirs.makeVariable + " " + fd.libraries.makeVariable;
 			if (fd.usePIL)
 				target += " " + fd.libraries.makeVariable;
+			target += " " + resFiles.makeVariable;
 		}
 		else if (fd.buildMode == BuildMode::StaticLibrary)
 		{

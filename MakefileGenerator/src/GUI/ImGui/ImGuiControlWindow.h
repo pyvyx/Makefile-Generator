@@ -21,7 +21,7 @@ namespace IGA {
     {
     private:
         bool m_SetMakeFileOutputPath = false;
-        std::array<IGWidget::Button*, 6> m_Buttons;
+        std::array<IGWidget::Button*, 5> m_Buttons;
         std::array<IGWidget::TextInputWithHint*, 9> m_TextInputs;
 
         IGWidget::TextInputWithHint m_OutputFileNameInput = IGWidget::TextInputWithHint("##NameOutputFile", "Set a name for the binary (libMyName.so/.dll for shared libs, libMyName.a/.lib for static libs)");
@@ -39,9 +39,7 @@ namespace IGA {
         IGWidget::Button m_SelectIncludeDirs = IGWidget::Button("Select directories##SelectIncludeDirs");
         IGWidget::TextInputWithHint m_IncludeDirsInput = IGWidget::TextInputWithHint("##IncludeDirs", "Add additional include directories");
 
-        IGWidget::Button m_SelectLibraries = IGWidget::Button("Select libraries");
         IGWidget::TextInputWithHint m_LibrariesInput = IGWidget::TextInputWithHint("##Libraries", "Link libraries e.G. -lpthread");
-
         IGWidget::Button m_SelectLibraryDirs = IGWidget::Button("Select directories##SelectLibraryDirs");
         IGWidget::TextInputWithHint m_LibraryDirsInput = IGWidget::TextInputWithHint("##LibraryDirs", "Add additional library directories");
 
@@ -64,6 +62,7 @@ namespace IGA {
                 m_Buttons[i]->resetPosSize(ws, offset);
                 offset += btn_offset;
             }
+            offset += btn_offset;
             m_CompilerComboBox.resetPosSize(ws, offset + btn_offset - IGWidget::sg_TextInputYOffset);
 
             offset = btn_offset - IGWidget::sg_TextInputYOffset;
@@ -75,7 +74,7 @@ namespace IGA {
         }
     public:
         ControlWindow() {
-            m_Buttons = { &m_SelectFiles, &m_SelectLibraryDirs, &m_SelectIncludeDirs, &m_SelectOutputDir, &m_SelectMakeFileOutputPath, &m_SelectLibraries };
+            m_Buttons = { &m_SelectFiles, &m_SelectLibraryDirs, &m_SelectIncludeDirs, &m_SelectOutputDir, &m_SelectMakeFileOutputPath };
             m_TextInputs = { &m_SearchInput, &m_LibraryDirsInput, &m_IncludeDirsInput, &m_OutputDirInput, &m_MakeFileOutputPathInput, &m_LibrariesInput, &m_CppcompilerFlagsInput, &m_CcompilerFlagsInput, &m_OutputFileNameInput };
         }
 

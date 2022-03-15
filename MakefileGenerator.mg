@@ -47,3 +47,4 @@ Dependencies/ImGui/src/imgui_widgets.cpp|.cpp
 Dependencies/nativefiledialog/src/example.cpp|.cpp
 Dependencies/nativefiledialog/src/nfd_common.c|.c
 Dependencies/nativefiledialog/src/nfd_win.cpp|.cpp
+MakefileGenerator/icon/gcc.res|.res
