@@ -1,7 +1,7 @@
 Makefile-Generator.exe
 0
 -D _GLFW_WIN32 -Ofast -s
--Ofast -s -Wl,--subsystem,windows
+-D USING_IMGUI -Ofast -s -Wl,--subsystem,windows
 -lopengl32 -lgdi32 -lole32 -luuid
 D:\Dev\MakefileGenerator
 
@@ -48,3 +48,6 @@ Dependencies/nativefiledialog/src/example.cpp|.cpp
 Dependencies/nativefiledialog/src/nfd_common.c|.c
 Dependencies/nativefiledialog/src/nfd_win.cpp|.cpp
 MakefileGenerator/icon/gcc.res|.res
+MakefileGenerator/src/Application.cpp|.cpp
+MakefileGenerator/src/GUI/ImGui/ApplicationWindows/ImGuiControlWindow.cpp|.cpp
+MakefileGenerator/src/GUI/ImGui/ApplicationWindows/ImGuiFileViewWindow.cpp|.cpp

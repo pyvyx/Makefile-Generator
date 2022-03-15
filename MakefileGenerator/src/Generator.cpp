@@ -4,6 +4,7 @@
 #include <fstream>
 #include <functional>
 #include <algorithm>
+#include <filesystem>
 
 #include "Generator.h"
 #include "FileHandler.h"
@@ -436,6 +437,9 @@ namespace MG {
 				info.linkLibraries = line;
 				break;
 			case 5:
+				if (line == "") {
+					line = std::filesystem::current_path().generic_string();
+				}
 				info.makeFileOutput = line;
 				break;
 			case 6:

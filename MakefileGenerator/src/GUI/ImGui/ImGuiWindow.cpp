@@ -14,6 +14,7 @@
 namespace IGW {
 
     static char sg_WindowEventHappened = 0;
+    static bool sg_ErrorOccured = false;
 
     //public
     Window::Window(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share)
@@ -47,6 +48,8 @@ namespace IGW {
 
         // set window pointer and callbacks
         Window* window = GetWindowPtr();
+        if (sg_ErrorOccured)
+            return;
         *window = *this;
 
         glfwSetCursorPosCallback      (m_Window, [](GLFWwindow*, double, double)        { sg_WindowEventHappened = 2; });
@@ -63,9 +66,11 @@ namespace IGW {
     Window::~Window()
     {
         // Cleanup
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
+        if (!sg_ErrorOccured) {
+            ImGui_ImplOpenGL3_Shutdown();
+            ImGui_ImplGlfw_Shutdown();
+            ImGui::DestroyContext();
+        }
 
         glfwDestroyWindow(m_Window);
         glfwTerminate();
@@ -115,10 +120,10 @@ namespace IGW {
 
     Window* GetWindowPtr()
     {
-        // implement (sizeof(Window, std::nothrow)
-        static Window* window = (Window*)::operator new(sizeof(Window));
-        //if (window == nullptr)
-        //    { } // inform the user and exit program
+        static Window* window = (Window*)::operator new(sizeof(Window), std::nothrow);
+        if (window == nullptr) {
+            sg_ErrorOccured = true;
+        } // inform the user
         return window;
     }
 
@@ -128,16 +133,15 @@ namespace IGW {
         ::operator delete(GetWindowPtr());
     }
 
-    void test(int a)
-    {
-        std::cout << 1 + a << std::endl;
-    }
 
-    void StartWindow()
+    bool StartWindow(const std::string& filePath)
     {
         IGW::Window window;
+        if (sg_ErrorOccured)
+            return false;
+
         window.imGuiInit(NULL);
-        IGA::Application app;
+        IGA::Application app(filePath);
 
         // Main loop
         while (window.isOpen())
@@ -147,7 +151,6 @@ namespace IGW {
 
             app.Run();
 
-            //ImGui::ShowDemoWindow();
             window.imGuiRender();
             if (sg_WindowEventHappened) {
                 window.pollEvents();
@@ -158,5 +161,6 @@ namespace IGW {
             window.swap();
         }
         FreeWindowPtr();
+        return true;
     }
 }
