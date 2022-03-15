@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include "ImGui/imgui.h"
 
 #include "ImGuiButton.h"
@@ -40,3 +41,4 @@ namespace IGWidget {
     }
 
 }
+#endif

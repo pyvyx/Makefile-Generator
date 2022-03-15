@@ -539,4 +539,3 @@ GLFWAPI void glfwSetGammaRamp(GLFWmonitor* handle, const GLFWgammaramp* ramp)
 
     _glfwPlatformSetGammaRamp(monitor, ramp);
 }
-

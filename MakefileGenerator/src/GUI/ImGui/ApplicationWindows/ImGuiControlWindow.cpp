@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include "ImGuiControlWindow.h"
 
 #include "FileHandler.h"
@@ -99,3 +100,4 @@ namespace IGA {
     }
 
 }
+#endif

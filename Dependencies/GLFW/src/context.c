@@ -753,4 +753,3 @@ GLFWAPI GLFWglproc glfwGetProcAddress(const char* procname)
 
     return window->context.getProcAddress(procname);
 }
-

@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include <string>
 
 #include "nfd/nfd.h"
@@ -126,3 +127,4 @@ namespace FileDialog {
         return "";
     }
 }
+#endif

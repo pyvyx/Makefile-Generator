@@ -329,4 +329,3 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance,
 
     return _glfwPlatformCreateWindowSurface(instance, window, allocator, surface);
 }
-

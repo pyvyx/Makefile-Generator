@@ -795,4 +795,3 @@ GLFWAPI HGLRC glfwGetWGLContext(GLFWwindow* handle)
 
     return window->context.wgl.handle;
 }
-

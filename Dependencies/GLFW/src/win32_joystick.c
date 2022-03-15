@@ -752,4 +752,3 @@ void _glfwPlatformUpdateGamepadGUID(char* guid)
                 original, original + 4);
     }
 }
-

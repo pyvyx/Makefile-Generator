@@ -620,4 +620,3 @@ const char* _glfwPlatformGetVersionString(void)
 #endif
         ;
 }
-

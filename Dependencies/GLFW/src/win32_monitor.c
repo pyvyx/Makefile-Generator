@@ -545,4 +545,3 @@ GLFWAPI const char* glfwGetWin32Monitor(GLFWmonitor* handle)
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
     return monitor->win32.publicDisplayName;
 }
-

@@ -787,4 +787,3 @@ GLFWAPI EGLSurface glfwGetEGLSurface(GLFWwindow* handle)
 
     return window->context.egl.surface;
 }
-

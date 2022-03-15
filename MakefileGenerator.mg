@@ -12,9 +12,7 @@ Dependencies/GLFW/include;Dependencies/ImGui/include/ImGui;Dependencies/ImGui/in
 MakefileGenerator/src/FileHandler.cpp|.cpp
 MakefileGenerator/src/Generator.cpp|.cpp
 MakefileGenerator/src/main.cpp|.cpp
-MakefileGenerator/src/Timer.cpp|.cpp
 MakefileGenerator/src/GUI/ImGui/ImGuiApplication.cpp|.cpp
-MakefileGenerator/src/GUI/ImGui/ImGuiContext.cpp|.cpp
 MakefileGenerator/src/GUI/ImGui/ImGuiWindow.cpp|.cpp
 MakefileGenerator/src/GUI/ImGui/Widgets/ImGuiButton.cpp|.cpp
 MakefileGenerator/src/GUI/ImGui/Widgets/ImGuiCheckBox.cpp|.cpp

@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -164,3 +165,4 @@ namespace IGW {
         return true;
     }
 }
+#endif

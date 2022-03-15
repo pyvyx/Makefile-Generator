@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include "ImGuiFileViewWindow.h"
 
 namespace IGA {
@@ -36,3 +37,4 @@ namespace IGA {
         ImGui::End();
 	}
 }
+#endif

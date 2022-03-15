@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include "GUI/ImGui/ImGuiApplication.h"
 
 // using ImGui --------------------------------------------------------
@@ -132,3 +133,4 @@ namespace IGA {
         fileEntries = info.files;
     }
 }
+#endif

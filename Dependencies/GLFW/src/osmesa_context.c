@@ -381,4 +381,3 @@ GLFWAPI OSMesaContext glfwGetOSMesaContext(GLFWwindow* handle)
 
     return window->context.osmesa.handle;
 }
-

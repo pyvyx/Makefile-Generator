@@ -18,6 +18,8 @@ namespace App {
         #ifdef USING_IMGUI
             return IGW::StartWindow(filePath);
         #endif
+
+        return true;
     }
 
 }

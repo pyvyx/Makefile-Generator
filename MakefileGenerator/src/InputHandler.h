@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cstring>
 
 class InputHandler
 {
@@ -234,6 +235,13 @@ Input HandleInput(int argc, char** argv) {
 			filePath = ip[1];
 		}
 	}
+
+	#ifdef USING_CMD
+	if (usingGuiMode) {
+		std::cout << "You don't have the gui mode installed! Recompile the program to get access to the gui mode\n";
+		error = true;
+	}
+	#endif
 
 	return { usingGuiMode, filePath, error };
 }
