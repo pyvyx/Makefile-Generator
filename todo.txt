@@ -6,6 +6,7 @@ add a c++/c version selector (c++17/c++20...)
 use seperate flags for c++ and c
 add ability to select folder and then get all c/c++ files in this folder
 to fix: include dirs (and probably other as well) dont't have a path when select on different harddrive (suggestion: check if it on the C/D/E drive and respond accordingly)
+add support for assembly
 
 This makefile specific:
 	add -Wl,--subsystem,windows or -mwindows to remove the console (windows only)

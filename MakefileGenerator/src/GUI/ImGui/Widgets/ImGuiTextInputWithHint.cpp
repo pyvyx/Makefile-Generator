@@ -36,6 +36,7 @@ namespace IGWidget {
     }
 
     std::string& TextInputWithHint::Input() { return input; }
+    void TextInputWithHint::SetInput(const std::string& str) { input = str; }
 
     void TextInputWithHint::resetPosSize(const ImVec2& ws, float y_offset)
     {

@@ -137,7 +137,7 @@ namespace IGW {
     {
         IGW::Window window;
         window.imGuiInit(NULL);
-
+        IGA::Application app;
 
         // Main loop
         while (window.isOpen())
@@ -145,7 +145,7 @@ namespace IGW {
             window.clear();
             window.imGuiStartFrame();
 
-            IGA::StartApplication();
+            app.Run();
 
             //ImGui::ShowDemoWindow();
             window.imGuiRender();

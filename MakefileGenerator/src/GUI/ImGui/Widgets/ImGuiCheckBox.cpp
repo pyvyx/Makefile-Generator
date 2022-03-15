@@ -14,4 +14,5 @@ namespace IGWidget {
 	}
 
 	bool& CheckBox::Checked() { return m_Checked; }
+	void CheckBox::SetState(bool checked) { m_Checked = checked; }
 }

@@ -1,7 +1,9 @@
 #include <exception>
+#include <iostream>
 #include "Debug.h"
 
 #include "GUI/Application.h"
+
 
 int main()
 {

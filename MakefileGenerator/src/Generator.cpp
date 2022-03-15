@@ -8,8 +8,33 @@
 #include "Generator.h"
 #include "FileHandler.h"
 
+#include "Debug.h"
+
 
 namespace MG {
+
+	// trim from start (in place)
+	inline void ltrim(std::string& s) {
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {return !std::isspace(ch);}));
+	}
+
+	// trim from end (in place)
+	inline void rtrim(std::string& s) {
+		s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {return !std::isspace(ch);}).base(), s.end());
+	}
+
+	// trim from both ends (in place)
+	inline void trim(std::string& s) {
+		ltrim(s);
+		rtrim(s);
+	}
+
+	inline std::string trimcp(std::string& s) {
+		std::string str = s;
+		ltrim(str);
+		rtrim(str);
+		return str;
+	}
 
 	std::string WIN_OR_LINUX(const std::string& windows_case, const std::string& linux_case)
 	{
@@ -351,46 +376,48 @@ namespace MG {
 	}
 
 
-	void SaveConfigFile(GeneratorInfo info, const std::string& file_path, bool selectedAll)
+	void SaveConfigFile(GeneratorInfo info, const std::string& file_path)
 	{
 		std::ofstream configFile(file_path);
-		configFile << info.outFileName << '\n';
+		configFile << trimcp(info.outFileName) << '\n';
 		configFile << info.selectedCompiler << '\n';
-		configFile << info.ccompilerFlags << '\n';
-		configFile << info.cppcompilerFlags << '\n';
-		configFile << info.linkLibraries << '\n';
-		configFile << info.makeFileOutput << '\n';
-		configFile << info.outputDir << '\n';
-		configFile << info.includeDirs << '\n';
-		configFile << info.libraryDirs << '\n';
+		configFile << trimcp(info.ccompilerFlags) << '\n';
+		configFile << trimcp(info.cppcompilerFlags) << '\n';
+		configFile << trimcp(info.linkLibraries) << '\n';
+		configFile << trimcp(info.makeFileOutput) << '\n';
+		configFile << trimcp(info.outputDir) << '\n';
+		configFile << trimcp(info.includeDirs) << '\n';
+		configFile << trimcp(info.libraryDirs) << '\n';
 		configFile << info.selectedBinaryFormat << '\n';
 		if (info.selectedBinaryFormat == BuildMode::DynamicLibrary)
 		{
-			configFile << info.dllFileName << '\n';
+			configFile << trimcp(info.dllFileName) << '\n';
 		}
-		configFile << selectedAll << '\n';
 		configFile << info.usePIL << '\n';
 		
 		for (size_t i = 0; i < info.files.size(); ++i)
 		{
 			if(!info.files[i].isDeleted())
-				configFile << info.files[i].fileName() << "|" << info.files[i].extension() << '\n';
+				configFile << trimcp(info.files[i].fileName()) << "|" << trimcp(info.files[i].extension()) << '\n';
 		}
 		configFile.close();
 	}
 
 
-	void LoadConfigFile(const std::string& file_path)
+	GeneratorInfo LoadConfigFile(const std::string& file_path)
 	{
 		GeneratorInfo info;
 		std::ifstream configFile(file_path);
+		if (!configFile) {
+			DEBUG_PRINT_NL("[LoadConfigFile] [ERROR] Unable to open input file: " << file_path);
+		}
 		std::string line;
 		size_t counter = 0;
-		bool selectedAll;
 
 		// add exception handling
 		while (std::getline(configFile, line))
 		{
+			trim(line);
 			switch (counter)
 			{
 			case 0:
@@ -421,12 +448,14 @@ namespace MG {
 				info.libraryDirs = line;
 				break;
 			case 9:
+				// check if a dll file name has been specified
 				info.selectedBinaryFormat = std::stoi(line);
+				if (info.selectedBinaryFormat == BuildMode::DynamicLibrary) {
+					std::getline(configFile, line); trim(line);
+					info.dllFileName = line;
+				}
 				break;
 			case 10:
-				selectedAll = std::stoi(line);
-				break;
-			case 11:
 				info.usePIL = std::stoi(line);
 				break;
 			default:
@@ -434,8 +463,10 @@ namespace MG {
 				info.files.push_back({ file_with_extension[0], file_with_extension[1] });
 				break;
 			}
+			++counter;
 		}
 
 		configFile.close();
+		return info;
 	}
 }

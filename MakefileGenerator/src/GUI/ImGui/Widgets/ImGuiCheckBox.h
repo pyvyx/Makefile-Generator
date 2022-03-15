@@ -13,6 +13,7 @@ namespace IGWidget {
 		CheckBox(const char* label, bool checked = false);
 		bool Changed(float sameLineOffset);
 		bool& Checked();
+		void SetState(bool checked);
 	};
 
 }

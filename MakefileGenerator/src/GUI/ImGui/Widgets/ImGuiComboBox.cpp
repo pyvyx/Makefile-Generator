@@ -31,6 +31,8 @@ namespace IGWidget {
 
     int ComboBox::SelectedItem() { return selected; }
 
+    void ComboBox::SetSelectedItem(int selectedItem) { selected = selectedItem; }
+
     void ComboBox::resetPosSize(const ImVec2& ws, float y_offset)
     {
         // set combo box pos

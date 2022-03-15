@@ -21,6 +21,7 @@ namespace MG {
         int selectedBinaryFormat = 0;
         std::string dllFileName;
         std::string outFileName;
+        bool selectedAll = false;
 
         void print()
         {
@@ -55,6 +56,6 @@ namespace MG {
     };
 
     void GenerateMakeFile(GeneratorInfo info);
-    void SaveConfigFile(GeneratorInfo info, const std::string& file_path, bool selectedAll);
-    void LoadConfigFile(const std::string& file_path);
+    void SaveConfigFile(GeneratorInfo info, const std::string& file_path);
+    GeneratorInfo LoadConfigFile(const std::string& file_path);
 }

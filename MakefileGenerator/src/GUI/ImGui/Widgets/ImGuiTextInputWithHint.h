@@ -20,6 +20,7 @@ namespace IGWidget {
         bool added();
         bool Added(float sameLineOffset, float width);
         std::string& Input();
+        void SetInput(const std::string& str);
         void resetPosSize(const ImVec2& ws, float y_offset);
     };
 

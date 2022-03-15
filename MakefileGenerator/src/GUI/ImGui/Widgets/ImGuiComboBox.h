@@ -21,6 +21,7 @@ namespace IGWidget {
         bool Selected();
         bool Selected(float sameLineOffset, float width);
         int SelectedItem();
+        void SetSelectedItem(int item);
         void resetPosSize(const ImVec2& ws, float y_offset);
     };
 
