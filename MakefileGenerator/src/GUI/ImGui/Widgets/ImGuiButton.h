@@ -17,6 +17,7 @@ namespace IGWidget {
 
         bool clicked(const char* label);
         bool clicked();
+        bool clicked(float sameLineOffset);
         void resetPosSize(const ImVec2& ws, float y_offset);
     };
 

@@ -12,4 +12,19 @@ namespace IGWidget {
         const ImVec4* const color;
     };
 
+    template<size_t S>
+    void PushStyleColors(const std::array<IGWidget::WidgetColor, S>& colorFlags)
+    {
+        for (size_t i = 0; i < colorFlags.size(); ++i)
+            ImGui::PushStyleColor(colorFlags[i].colorFlag, *colorFlags[i].color);
+    }
+
+
+    template<size_t S>
+    void PopStyleColors(const std::array<IGWidget::WidgetColor, S>& colorFlags)
+    {
+        for (size_t i = 0; i < colorFlags.size(); ++i)
+            ImGui::PopStyleColor();
+    }
+
 }

@@ -8,8 +8,33 @@
 #include "Generator.h"
 #include "FileHandler.h"
 
+#include "Debug.h"
+
 
 namespace MG {
+
+	// trim from start (in place)
+	inline void ltrim(std::string& s) {
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {return !std::isspace(ch);}));
+	}
+
+	// trim from end (in place)
+	inline void rtrim(std::string& s) {
+		s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {return !std::isspace(ch);}).base(), s.end());
+	}
+
+	// trim from both ends (in place)
+	inline void trim(std::string& s) {
+		ltrim(s);
+		rtrim(s);
+	}
+
+	inline std::string trimcp(std::string& s) {
+		std::string str = s;
+		ltrim(str);
+		rtrim(str);
+		return str;
+	}
 
 	std::string WIN_OR_LINUX(const std::string& windows_case, const std::string& linux_case)
 	{
@@ -224,7 +249,7 @@ namespace MG {
 		}
 		target += "\n\t";
 
-		if (fd.buildMode == BuildModes::Application)
+		if (fd.buildMode == BuildMode::Application)
 		{
 			target += fd.cppcompiler.makeVariable + " " + fd.cppcompilerFlags.makeVariable + " ";
 			if(fd.usePIL)
@@ -232,20 +257,20 @@ namespace MG {
 
 			for (auto& i : vec)
 				target += i.objfiles.makeVariable + " ";
-			target += resFiles.makeVariable;
 			target += " -o " + fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + " ";
 			target += fd.libraryDirs.makeVariable + " " + fd.libraries.makeVariable;
 			if (fd.usePIL)
 				target += " " + fd.libraries.makeVariable;
+			target += " " + resFiles.makeVariable;
 		}
-		else if (fd.buildMode == BuildModes::StaticLibrary)
+		else if (fd.buildMode == BuildMode::StaticLibrary)
 		{
 			target += "ar rcs " + fd.outFolder.makeVariable + "/" + fd.outFile.makeVariable + "";
 			target += " ";
 			for (auto& i : vec)
 				target += i.objfiles.makeVariable + " ";
 		}
-		else if (fd.buildMode == BuildModes::DynamicLibrary)
+		else if (fd.buildMode == BuildMode::DynamicLibrary)
 		{
 			target += fd.cppcompiler.makeVariable + " -shared -Wl,--out-implib," + fd.outFolder.makeVariable 
 				+ "/" + fd.outFileDll->makeVariable + " ";
@@ -340,13 +365,108 @@ namespace MG {
 		fd.buildMode = info.selectedBinaryFormat;
 		fd.rawOutFileName = info.outFileName;
 		
-		MakeFileVariable outFileDll("$(DLLLIB)", "DLLLIB", info.dllFileName == "" ? "MyOutputDll" : info.dllFileName);
-		if (info.selectedBinaryFormat == BuildModes::DynamicLibrary)
+		MakeFileVariable outFileDll("$(SHAREDLIB)", "SHAREDLIB", info.dllFileName == "" ? "MyOutputDll" : info.dllFileName);
+		if (info.selectedBinaryFormat == BuildMode::DynamicLibrary)
 		{
 			fd.outFileDll = &outFileDll;
 		}
 
 
 		WriteMakeFile(fd, info.makeFileOutput, info.files);
+	}
+
+
+	void SaveConfigFile(GeneratorInfo info, const std::string& file_path)
+	{
+		std::ofstream configFile(file_path);
+		configFile << trimcp(info.outFileName) << '\n';
+		configFile << info.selectedCompiler << '\n';
+		configFile << trimcp(info.ccompilerFlags) << '\n';
+		configFile << trimcp(info.cppcompilerFlags) << '\n';
+		configFile << trimcp(info.linkLibraries) << '\n';
+		configFile << trimcp(info.makeFileOutput) << '\n';
+		configFile << trimcp(info.outputDir) << '\n';
+		configFile << trimcp(info.includeDirs) << '\n';
+		configFile << trimcp(info.libraryDirs) << '\n';
+		configFile << info.selectedBinaryFormat << '\n';
+		if (info.selectedBinaryFormat == BuildMode::DynamicLibrary)
+		{
+			configFile << trimcp(info.dllFileName) << '\n';
+		}
+		configFile << info.usePIL << '\n';
+		
+		for (size_t i = 0; i < info.files.size(); ++i)
+		{
+			if(!info.files[i].isDeleted())
+				configFile << trimcp(info.files[i].fileName()) << "|" << trimcp(info.files[i].extension()) << '\n';
+		}
+		configFile.close();
+	}
+
+
+	GeneratorInfo LoadConfigFile(const std::string& file_path)
+	{
+		GeneratorInfo info;
+		std::ifstream configFile(file_path);
+		if (!configFile) {
+			DEBUG_PRINT_NL("[LoadConfigFile] [ERROR] Unable to open input file: " << file_path);
+		}
+		std::string line;
+		size_t counter = 0;
+
+		// add exception handling
+		while (std::getline(configFile, line))
+		{
+			trim(line);
+			switch (counter)
+			{
+			case 0:
+				info.outFileName = line;
+				break;
+			case 1:
+				info.selectedCompiler = std::stoi(line);
+				break;
+			case 2:
+				info.ccompilerFlags = line;
+				break;
+			case 3:
+				info.cppcompilerFlags = line;
+				break;
+			case 4:
+				info.linkLibraries = line;
+				break;
+			case 5:
+				info.makeFileOutput = line;
+				break;
+			case 6:
+				info.outputDir = line;
+				break;
+			case 7:
+				info.includeDirs = line;
+				break;
+			case 8:
+				info.libraryDirs = line;
+				break;
+			case 9:
+				// check if a dll file name has been specified
+				info.selectedBinaryFormat = std::stoi(line);
+				if (info.selectedBinaryFormat == BuildMode::DynamicLibrary) {
+					std::getline(configFile, line); trim(line);
+					info.dllFileName = line;
+				}
+				break;
+			case 10:
+				info.usePIL = std::stoi(line);
+				break;
+			default:
+				std::vector<std::string> file_with_extension = splitStringByChar(line, '|');
+				info.files.push_back({ file_with_extension[0], file_with_extension[1] });
+				break;
+			}
+			++counter;
+		}
+
+		configFile.close();
+		return info;
 	}
 }

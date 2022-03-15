@@ -6,10 +6,10 @@
 
 namespace App {
 
-    void startApplication()
+    void StartApplication()
     {
         #ifdef USING_IMGUI
-            IGW::startWindow();
+            IGW::StartWindow();
         #endif
     }
 }
