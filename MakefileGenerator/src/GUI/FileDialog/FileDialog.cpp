@@ -55,7 +55,11 @@ namespace FileDialog {
             }
             else
             {
-                if (*base_str != outPath)
+                if (base_str == nullptr) {
+                    *str += outPath;
+                    str->append(";");
+                }
+                else if (*base_str != outPath)
                 {
                     str->append(FH::GetRelativePath(base_str, outPath));
                     str->append(";");

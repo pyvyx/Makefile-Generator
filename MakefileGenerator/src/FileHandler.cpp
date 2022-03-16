@@ -4,6 +4,7 @@
 #include <unordered_set>
 
 #include "FileHandler.h"
+#include "Generator.h"
 
 namespace FH {
 
@@ -151,8 +152,28 @@ namespace FH {
 	}
 
 
+	std::string GetHardDrive(const std::string& str) {
+		std::vector<std::string> filePath = MG::SplitStringByChar(str, ':');
+		if (filePath.size() == 0)
+			return "";
+		return filePath[0];
+	}
+
+
+	bool HardDrivesDontMatch(const std::string* const base_str, const char* const relative_str) {
+		#ifdef WIN32
+			if (GetHardDrive(*base_str) != GetHardDrive(relative_str))
+				return true;
+		#endif
+		return false;
+	}
+
+
 	std::string GetRelativePath(const std::string* const base_str, const char* const relative_str)
 	{
+		if (HardDrivesDontMatch(base_str, relative_str))
+			return relative_str;
+
 		std::filesystem::path base(*base_str);
 		std::filesystem::path relative(relative_str);
 		return std::filesystem::relative(relative, base).generic_string();

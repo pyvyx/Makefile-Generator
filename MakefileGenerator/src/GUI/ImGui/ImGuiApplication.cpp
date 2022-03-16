@@ -101,7 +101,6 @@ namespace IGA {
         m_GenInfo.usePIL = m_UsePIL.Checked();
         m_GenInfo.selectedBinaryFormat = m_SelectedBinFormat.SelectedItem();
         m_GenInfo.dllFileName = m_DllFileNameInput.Input();
-        m_GenInfo.selectedAll = m_SelectAll.Checked();
 
         // File view
         FH::FileEntryVec& fileEntries = FH::GetFileEntriesRef();
@@ -126,7 +125,6 @@ namespace IGA {
         m_UsePIL.SetState(info.usePIL);
         m_SelectedBinFormat.SetSelectedItem(info.selectedBinaryFormat);
         m_DllFileNameInput.SetInput(info.dllFileName);
-        m_SelectAll.SetState(info.selectedAll);
 
         // File view
         FH::FileEntryVec& fileEntries = FH::GetFileEntriesRef();

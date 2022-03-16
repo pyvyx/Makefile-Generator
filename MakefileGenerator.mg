@@ -1,6 +1,6 @@
 Makefile-Generator.exe
 0
--D _GLFW_WIN32 -Ofast -s
+-D USING_IMGUI -D _GLFW_WIN32 -Ofast -s
 -D USING_IMGUI -Ofast -s -Wl,--subsystem,windows
 -lopengl32 -lgdi32 -lole32 -luuid
 D:\Dev\MakefileGenerator

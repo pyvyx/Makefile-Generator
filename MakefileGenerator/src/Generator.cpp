@@ -56,7 +56,7 @@ namespace MG {
 		std::string value;
 	};
 
-	std::vector<std::string> splitStringByChar(const std::string& str, char to_split)
+	std::vector<std::string> SplitStringByChar(const std::string& str, char to_split)
 	{
 		std::stringstream test(str);
 		std::string segment;
@@ -70,7 +70,7 @@ namespace MG {
 	}
 
 
-	std::pair<MakeFileVariable, MakeFileVariable> getCompiler(int selectedCompiler)
+	std::pair<MakeFileVariable, MakeFileVariable> GetCompiler(int selectedCompiler)
 	{
 		switch (selectedCompiler)
 		{
@@ -92,10 +92,10 @@ namespace MG {
 	}
 
 
-	MakeFileVariable createDirectoryPaths(const std::string& include_dirs, const std::string& identifier)
+	MakeFileVariable CreateDirectoryPaths(const std::string& include_dirs, const std::string& identifier)
 	{
 		std::string result;
-		std::vector<std::string> includeDirs = splitStringByChar(include_dirs, ';');
+		std::vector<std::string> includeDirs = SplitStringByChar(include_dirs, ';');
 		for (size_t i = 0; i < includeDirs.size(); ++i)
 			result.append("-" + identifier + includeDirs[i] + "/ ");
 
@@ -108,7 +108,7 @@ namespace MG {
 	}
 
 
-	std::string generateTarget(const std::string& targetName, const std::string& dependencies, const std::string& command)
+	std::string GenerateTarget(const std::string& targetName, const std::string& dependencies, const std::string& command)
 	{
 		std::string target = targetName + ": " + dependencies + "\n" + command;
 		return target;
@@ -334,9 +334,9 @@ namespace MG {
 
 		makeFile << extensionTargets;
 
-		makeFile << generateTarget(fd.outFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.outFolder.makeVariable) << '\n';
-		makeFile << generateTarget(fd.intFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.intFolder.makeVariable) << "\n\n";
-		makeFile << generateTarget("clean", "", WIN_OR_LINUX("\trmdir /s /q ", "\trm -r ") + fd.outFolder.makeVariable);
+		makeFile << GenerateTarget(fd.outFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.outFolder.makeVariable) << '\n';
+		makeFile << GenerateTarget(fd.intFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.intFolder.makeVariable) << "\n\n";
+		makeFile << GenerateTarget("clean", "", WIN_OR_LINUX("\trmdir /s /q ", "\trm -r ") + fd.outFolder.makeVariable);
 		makeFile.close();
 	}
 
@@ -346,13 +346,13 @@ namespace MG {
 		if (info.makeFileOutput == "" || info.files.size() == 0)
 			return;
 
-		std::pair<MakeFileVariable, MakeFileVariable> compiler = getCompiler(info.selectedCompiler);
+		std::pair<MakeFileVariable, MakeFileVariable> compiler = GetCompiler(info.selectedCompiler);
 		MakeFileVariable ccompiler = compiler.first;
 		MakeFileVariable ccompilerFlags("$(CFLAGS)", "CFLAGS", info.ccompilerFlags);
 		MakeFileVariable cppcompiler = compiler.second;
 		MakeFileVariable cppcompilerFlags("$(CXXFLAGS)", "CXXFLAGS", info.cppcompilerFlags);
-		MakeFileVariable includeDirectories = createDirectoryPaths(info.includeDirs, "I");
-		MakeFileVariable libraryDirectories = createDirectoryPaths(info.libraryDirs, "L");
+		MakeFileVariable includeDirectories = CreateDirectoryPaths(info.includeDirs, "I");
+		MakeFileVariable libraryDirectories = CreateDirectoryPaths(info.libraryDirs, "L");
 		MakeFileVariable libraries("$(LIBRARIES)", "LIBRARIES", info.linkLibraries);
 
 		MakeFileVariable outFile("$(EXE)", "EXE", info.outFileName == "" ? "MyOutput" : info.outFileName);
@@ -462,7 +462,7 @@ namespace MG {
 				info.usePIL = std::stoi(line);
 				break;
 			default:
-				std::vector<std::string> file_with_extension = splitStringByChar(line, '|');
+				std::vector<std::string> file_with_extension = SplitStringByChar(line, '|');
 				info.files.push_back({ file_with_extension[0], file_with_extension[1] });
 				break;
 			}

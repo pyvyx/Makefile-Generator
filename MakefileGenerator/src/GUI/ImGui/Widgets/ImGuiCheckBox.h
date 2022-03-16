@@ -3,7 +3,7 @@
 
 namespace IGWidget {
 
-	class CheckBox : public WidgetStatus
+	class CheckBox : public Widget
 	{
 	private:
 		const char* m_Label = nullptr;

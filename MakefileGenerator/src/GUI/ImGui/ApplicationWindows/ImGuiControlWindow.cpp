@@ -23,6 +23,11 @@ namespace IGA {
         if (m_SelectMakeFileOutputPath.clicked())
             FileDialog::FolderSelectionDialog(nullptr, &m_MakeFileOutputPathInput.input, true);
 
+        std::string* basePath = nullptr;
+        if (m_MakeFileOutputPathInput.input != "") {
+            basePath = &m_MakeFileOutputPathInput.input;
+        }
+
 
         m_OutputFileNameInput.added();
         m_MakeFileOutputPathInput.added();
@@ -30,7 +35,7 @@ namespace IGA {
         // binary output directory
         if (m_SelectOutputDir.clicked())
         {
-            FileDialog::FolderSelectionDialog(&m_MakeFileOutputPathInput.input, &m_OutputDirInput.input, true);
+            FileDialog::FolderSelectionDialog(basePath, &m_OutputDirInput.input, true);
         }
         m_OutputDirInput.added();
 
@@ -44,7 +49,7 @@ namespace IGA {
         // include directories
         if (m_SelectIncludeDirs.clicked())
         {
-            FileDialog::FolderSelectionDialog(&m_MakeFileOutputPathInput.input, &m_IncludeDirsInput.input, false);
+            FileDialog::FolderSelectionDialog(basePath, &m_IncludeDirsInput.input, false);
         }
         m_IncludeDirsInput.added();
 
@@ -54,7 +59,7 @@ namespace IGA {
         // library directories
         if (m_SelectLibraryDirs.clicked())
         {
-            FileDialog::FolderSelectionDialog(&m_MakeFileOutputPathInput.input, &m_LibraryDirsInput.input, false);
+            FileDialog::FolderSelectionDialog(basePath, &m_LibraryDirsInput.input, false);
         }
         m_LibraryDirsInput.added();
 
