@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 // dear imgui, v1.87
 // (main code and documentation)
 
@@ -18795,3 +18796,4 @@ void ImGui::UpdateDebugToolStackQueries() {}
 //-----------------------------------------------------------------------------
 
 #endif // #ifndef IMGUI_DISABLE
+#endif

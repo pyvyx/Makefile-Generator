@@ -19,7 +19,7 @@ namespace App {
             return IGW::StartWindow(filePath);
         #endif
 
-        return true;
+        //return false;
     }
 
 }

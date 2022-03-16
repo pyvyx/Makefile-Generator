@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 // dear imgui, v1.87
 // (demo code)
 
@@ -8209,3 +8210,4 @@ void ImGui::ShowStyleEditor(ImGuiStyle*) {}
 #endif
 
 #endif // #ifndef IMGUI_DISABLE
+#endif

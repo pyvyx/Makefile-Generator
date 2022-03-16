@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 /*
   Native File Dialog
 
@@ -140,3 +141,4 @@ int NFDi_IsFilterSegmentChar( char ch )
     return (ch==','||ch==';'||ch=='\0');
 }
 
+#endif

@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 /*
   Native File Dialog
 
@@ -760,3 +761,4 @@ nfdresult_t NFD_PickFolder(const nfdchar_t *defaultPath,
 
     return nfdResult;
 }
+#endif

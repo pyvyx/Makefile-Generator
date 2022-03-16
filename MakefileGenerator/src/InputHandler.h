@@ -68,11 +68,11 @@ public:
 		return false;
 	}
 
-	bool isNumber(const char* data)
+	int isNumber(const char* data)
 	{
 		try {
-			std::stoi(data);
-			return true;
+			int number = std::stoi(data);
+			return number;
 		}
 		catch (...) {
 			return false;
@@ -126,8 +126,8 @@ public:
 	{
 		std::string result;
 
-		for (int i = 0; i < data.size(); ++i)
-			result += ::tolower(data[i]);
+		for (size_t i = 0; i < data.size(); ++i)
+			result += static_cast<char>(::tolower(data[i]));
 
 		return result;
 	}
@@ -136,8 +136,8 @@ public:
 	{
 		std::string result;
 
-		for (int i = 0; i < data.size(); ++i)
-			result += ::toupper(data[i]);
+		for (size_t i = 0; i < data.size(); ++i)
+			result += static_cast<char>(::toupper(data[i]));
 
 		return result;
 	}
@@ -147,9 +147,9 @@ public:
 		if (m_Uppered)
 			return;
 
-		for (int i = 0; i < m_InputStrings.size(); ++i)
-			for (int j = 0; j < m_InputStrings[i].size(); ++j)
-				m_InputStrings[i][j] = std::toupper(m_InputStrings[i][j]);
+		for (size_t i = 0; i < m_InputStrings.size(); ++i)
+			for (size_t j = 0; j < m_InputStrings[i].size(); ++j)
+				m_InputStrings[i][j] = static_cast<char>(std::toupper(m_InputStrings[i][j]));
 
 		m_Uppered = true;
 		m_Lowered = false;
@@ -160,9 +160,9 @@ public:
 		if (m_Lowered)
 			return;
 
-		for (int i = 0; i < m_InputStrings.size(); ++i)
-			for (int j = 0; j < m_InputStrings[i].size(); ++j)
-				m_InputStrings[i][j] = std::tolower(m_InputStrings[i][j]);
+		for (size_t i = 0; i < m_InputStrings.size(); ++i)
+			for (size_t j = 0; j < m_InputStrings[i].size(); ++j)
+				m_InputStrings[i][j] = static_cast<char>(std::tolower(m_InputStrings[i][j]));
 
 		m_Uppered = false;
 		m_Lowered = true;
@@ -236,7 +236,7 @@ Input HandleInput(int argc, char** argv) {
 		}
 	}
 
-	#ifdef USING_CMD
+	#ifndef USING_IMGUI
 	if (usingGuiMode) {
 		std::cout << "You don't have the gui mode installed! Recompile the program to get access to the gui mode\n";
 		error = true;

@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 //========================================================================
 // GLFW 3.3 - www.glfw.org
 //------------------------------------------------------------------------
@@ -329,3 +330,4 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance,
 
     return _glfwPlatformCreateWindowSurface(instance, window, allocator, surface);
 }
+#endif

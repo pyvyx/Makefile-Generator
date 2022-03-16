@@ -1,5 +1,5 @@
 CCOMP=gcc
-CFLAGS=-D _GLFW_WIN32 -Ofast -s
+CFLAGS=-D USING_IMGUI -D _GLFW_WIN32 -Ofast -s
 CXXCOMP=g++
 CXXFLAGS=-D USING_IMGUI -Ofast -s -Wl,--subsystem,windows
 INCLUDEDIRS=-IDependencies/GLFW/include/ -IDependencies/ImGui/include/ImGui/ -IDependencies/ImGui/include/ -IDependencies/nativefiledialog/include/ -IDependencies/nativefiledialog/include/nfd/ -IMakefileGenerator/vendor/ -IMakefileGenerator/src/ 
