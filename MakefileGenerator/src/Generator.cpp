@@ -30,11 +30,10 @@ namespace MG {
 		rtrim(s);
 	}
 
-	inline std::string trimcp(std::string& s) {
-		std::string str = s;
-		ltrim(str);
-		rtrim(str);
-		return str;
+	inline std::string trimcp(std::string s) {
+		ltrim(s);
+		rtrim(s);
+		return s;
 	}
 
 	std::string WIN_OR_LINUX(const std::string& windows_case, const std::string& linux_case)
@@ -123,7 +122,7 @@ namespace MG {
 	}
 
 
-	std::unordered_set<std::string> getAllSourceDirectories(FH::FileEntryVec& vec)
+	std::unordered_set<std::string> GetAllSourceDirectories(const FH::FileEntryVec& vec)
 	{
 		std::unordered_set<std::string> sourceDirs;
 		for (size_t i = 0; i < vec.size(); ++i)
@@ -141,7 +140,7 @@ namespace MG {
 	}
 
 
-	std::unordered_set<std::string> GetAllFileExtensions(FH::FileEntryVec& vec)
+	std::unordered_set<std::string> GetAllFileExtensions(const FH::FileEntryVec& vec)
 	{
 		std::unordered_set<std::string> fileExtensions;
 		for (auto& i : vec)
@@ -190,7 +189,7 @@ namespace MG {
 	};
 
 
-	std::pair<std::vector<BuildTargets>, MakeFileVariable> CreateFileVariables(const FileData& fd, FH::FileEntryVec& vec)
+	std::pair<std::vector<BuildTargets>, MakeFileVariable> CreateFileVariables(const FileData& fd, const FH::FileEntryVec& vec)
 	{
 		std::unordered_set<std::string> extensions = GetAllFileExtensions(vec);
 		std::vector<BuildTargets> ve;
@@ -224,7 +223,7 @@ namespace MG {
 					sourceFiles += j.fileName() + " ";
 			}
 
-			std::unordered_set<std::string> sourceDirs = getAllSourceDirectories(vec);
+			std::unordered_set<std::string> sourceDirs = GetAllSourceDirectories(vec);
 			for (auto& j : sourceDirs)
 			{
 				std::string compiler = i == ".c" ? fd.ccompiler.makeVariable : fd.cppcompiler.makeVariable;
@@ -288,7 +287,7 @@ namespace MG {
 	}
 
 
-	void WriteMakeFile(const FileData& fd, const std::string& makefileOutput, FH::FileEntryVec& vec)
+	void WriteMakeFile(const FileData& fd, const std::string& makefileOutput, const FH::FileEntryVec& vec)
 	{
 		std::ofstream makeFile(makefileOutput + "/makefile");
 		if (!makeFile)
@@ -342,7 +341,7 @@ namespace MG {
 	}
 
 
-	void GenerateMakeFile(GeneratorInfo info)
+	void GenerateMakeFile(const GeneratorInfo& info)
 	{
 		if (info.makeFileOutput == "" || info.files.size() == 0)
 			return;
@@ -377,7 +376,7 @@ namespace MG {
 	}
 
 
-	void SaveConfigFile(GeneratorInfo info, const std::string& file_path)
+	void SaveConfigFile(const GeneratorInfo& info, const std::string& file_path)
 	{
 		std::ofstream configFile(file_path);
 		configFile << trimcp(info.outFileName) << '\n';

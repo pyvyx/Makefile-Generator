@@ -7,8 +7,6 @@
 
 namespace FH {
 
-	//static std::vector<FileEntry> sg_FileEntries;
-
 	FileEntry::FileEntry(const std::string& str, const std::string& ext)
 		:  m_FileName(str), m_FileExtension(ext)
 		{}
@@ -35,12 +33,12 @@ namespace FH {
 	void FileEntry::setFileExtension(const std::string& str) { m_FileExtension = str; }
 
 	bool& FileEntry::getSelectedRef()			{ return m_Selected;      }
-	bool FileEntry::isSelected()				{ return m_Selected;      }
-	bool FileEntry::isShown()					{ return m_Shown;         }
-	bool FileEntry::isDeleted()					{ return m_Deleted;       }
-	int  FileEntry::deletedID()					{ return m_DeletedID;     }
-	std::string& FileEntry::fileName()			{ return m_FileName;      }
-	std::string& FileEntry::extension()			{ return m_FileExtension; }
+	bool FileEntry::isSelected() const			{ return m_Selected;      }
+	bool FileEntry::isShown()    const			{ return m_Shown;         }
+	bool FileEntry::isDeleted()	 const			{ return m_Deleted;       }
+	int  FileEntry::deletedID()	 const			{ return m_DeletedID;     }
+	std::string FileEntry::fileName()  const	{ return m_FileName;      }
+	std::string FileEntry::extension() const	{ return m_FileExtension; }
 
 
 	FileEntryVec& GetFileEntriesRef()

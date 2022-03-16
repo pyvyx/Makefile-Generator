@@ -26,12 +26,12 @@ namespace FH {
 		void setFileExtension(const std::string& str);
 
 		bool& getSelectedRef();
-		bool isSelected();
-		bool isShown();
-		bool isDeleted();
-		int deletedID();
-		std::string& fileName();
-		std::string& extension();
+		bool isSelected() const;
+		bool isShown() const;
+		bool isDeleted() const;
+		int deletedID() const;
+		std::string fileName() const;
+		std::string extension() const;
 	};
 
 	using FileEntryVec = std::vector<FileEntry>;

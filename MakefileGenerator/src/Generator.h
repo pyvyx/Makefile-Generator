@@ -9,6 +9,8 @@ namespace MG {
     struct GeneratorInfo
     {
         int selectedCompiler = 0;
+        int selectedBinaryFormat = 0;
+        bool selectedAll = false;
         bool usePIL = true;
         std::string ccompilerFlags;
         std::string cppcompilerFlags;
@@ -17,25 +19,9 @@ namespace MG {
         std::string outputDir;
         std::string includeDirs;
         std::string libraryDirs;
-        std::vector<FH::FileEntry> files;
-        int selectedBinaryFormat = 0;
         std::string dllFileName;
         std::string outFileName;
-        bool selectedAll = false;
-
-        void print()
-        {
-            std::cout << "Selected compiler : " << selectedCompiler << std::endl;
-            std::cout << "C compiler Flags  : " << ccompilerFlags << std::endl;
-            std::cout << "C++ compiler Flags: " << cppcompilerFlags << std::endl;
-            std::cout << "Link libraries    : " << linkLibraries << std::endl;
-            std::cout << "Makefile output   : " << makeFileOutput << std::endl;
-            std::cout << "Output directory  : " << outputDir << std::endl;
-            std::cout << "Include directory : " << includeDirs << std::endl;
-            std::cout << "Library directory : " << libraryDirs << std::endl;
-            std::cout << "Selected bin form : " << selectedBinaryFormat << std::endl;
-            std::cout << "Files             : " << files.size() << std::endl;
-        }
+        std::vector<FH::FileEntry> files;
     };
 
     enum Compiler : char
@@ -55,7 +41,7 @@ namespace MG {
         DynamicLibrary
     };
 
-    void GenerateMakeFile(GeneratorInfo info);
-    void SaveConfigFile(GeneratorInfo info, const std::string& file_path);
+    void GenerateMakeFile(const GeneratorInfo& info);
+    void SaveConfigFile(const GeneratorInfo& info, const std::string& file_path);
     GeneratorInfo LoadConfigFile(const std::string& file_path);
 }
