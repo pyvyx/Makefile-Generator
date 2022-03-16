@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 //========================================================================
 // GLFW 3.3 - www.glfw.org
 //------------------------------------------------------------------------
@@ -323,4 +324,4 @@ GLFWAPI GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun cbfun)
     _GLFW_SWAP_POINTERS(_glfwErrorCallback, cbfun);
     return cbfun;
 }
-
+#endif

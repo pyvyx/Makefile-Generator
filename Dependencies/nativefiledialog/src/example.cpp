@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include "nfd.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,3 +20,4 @@ void createDialog()
         printf("Error: %s\n", NFD_GetError());
     }
 }
+#endif

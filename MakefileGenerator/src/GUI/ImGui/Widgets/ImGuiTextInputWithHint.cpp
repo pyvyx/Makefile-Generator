@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include <string>
 
 #include "ImGui/imgui.h"
@@ -48,3 +49,4 @@ namespace IGWidget {
         length = IGWidget_X_SIZE_TEXT_INPUT(ws.x);
     }
 }
+#endif

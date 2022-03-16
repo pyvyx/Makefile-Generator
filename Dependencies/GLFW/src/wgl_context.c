@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 //========================================================================
 // GLFW 3.3 WGL - www.glfw.org
 //------------------------------------------------------------------------
@@ -795,4 +796,4 @@ GLFWAPI HGLRC glfwGetWGLContext(GLFWwindow* handle)
 
     return window->context.wgl.handle;
 }
-
+#endif

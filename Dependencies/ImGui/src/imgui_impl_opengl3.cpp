@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 // dear imgui: Renderer Backend for modern OpenGL with shaders / programmatic pipeline
 // - Desktop GL: 2.x 3.x 4.x
 // - Embedded GL: ES 2.0 (WebGL 1.0), ES 3.0 (WebGL 2.0)
@@ -847,4 +848,5 @@ static void ImGui_ImplOpenGL3_ShutdownPlatformInterface()
 
 #if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
 #endif

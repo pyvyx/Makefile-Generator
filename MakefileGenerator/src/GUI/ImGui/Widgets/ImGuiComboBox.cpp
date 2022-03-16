@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include "ImGui/imgui.h"
 
 #include "ImGuiComboBox.h"
@@ -44,3 +45,4 @@ namespace IGWidget {
     }
 
 }
+#endif

@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 //========================================================================
 // GLFW 3.3 Win32 - www.glfw.org
 //------------------------------------------------------------------------
@@ -752,4 +753,4 @@ void _glfwPlatformUpdateGamepadGUID(char* guid)
                 original, original + 4);
     }
 }
-
+#endif

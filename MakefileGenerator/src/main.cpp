@@ -1,20 +1,14 @@
-#include <exception>
-#include <iostream>
-#include "Debug.h"
-
-#include "GUI/Application.h"
+#include "Application.h"
+#include "InputHandler.h"
 
 
-int main()
+int main(int argc, char** argv)
 {
-	// replace by returning bool
-	try
-	{
-		App::StartApplication();
-	}
-	catch (const std::exception& ex)
-	{
-		DEBUG_PRINT_NL("Exception reason: " << ex.what())
-		std::cin.get();
-	}
+	Input ip = HandleInput(argc, argv);
+	if (ip.error)
+		return 1;
+
+	if (!App::StartApplication(ip.guiMode, ip.filePath))
+		return 1;
+	return 0;
 }

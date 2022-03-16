@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 // dear imgui, v1.87
 // (drawing and font code)
 
@@ -4188,3 +4189,4 @@ static const char* GetDefaultCompressedFontDataTTFBase85()
 }
 
 #endif // #ifndef IMGUI_DISABLE
+#endif

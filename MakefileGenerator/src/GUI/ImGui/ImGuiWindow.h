@@ -1,6 +1,9 @@
 #pragma once
+#include <string>
 #include <utility>
 #include "GLFW/glfw3.h"
+
+#define IMGUI_WINDOW_FLAGS ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar
 
 namespace IGW {
 
@@ -34,7 +37,7 @@ namespace IGW {
 	};
 
 	Window* GetWindowPtr();
-	void StartWindow();
+	bool StartWindow(const std::string& filePath);
 }
 // Poll and handle events (inputs, window resize, etc.)
 // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.

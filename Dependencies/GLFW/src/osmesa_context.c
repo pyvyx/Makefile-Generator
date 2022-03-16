@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 //========================================================================
 // GLFW 3.3 OSMesa - www.glfw.org
 //------------------------------------------------------------------------
@@ -381,4 +382,4 @@ GLFWAPI OSMesaContext glfwGetOSMesaContext(GLFWwindow* handle)
 
     return window->context.osmesa.handle;
 }
-
+#endif

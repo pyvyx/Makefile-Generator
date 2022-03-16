@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 //========================================================================
 // GLFW 3.3 Win32 - www.glfw.org
 //------------------------------------------------------------------------
@@ -58,3 +59,4 @@ uint64_t _glfwPlatformGetTimerFrequency(void)
     return _glfw.timer.win32.frequency;
 }
 
+#endif

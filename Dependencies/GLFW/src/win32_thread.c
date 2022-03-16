@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 //========================================================================
 // GLFW 3.3 Win32 - www.glfw.org
 //------------------------------------------------------------------------
@@ -97,3 +98,4 @@ void _glfwPlatformUnlockMutex(_GLFWmutex* mutex)
     LeaveCriticalSection(&mutex->win32.section);
 }
 
+#endif

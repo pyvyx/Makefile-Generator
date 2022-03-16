@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 #include "ImGui/imgui.h"
 
 #include "ImGuiButton.h"
@@ -25,7 +26,6 @@ namespace IGWidget {
     {
         ImGui::SameLine(sameLineOffset);
         return ImGui::Button(m_Label);
-        return false;
     }
 
     void Button::resetPosSize(const ImVec2& ws, float y_offset)
@@ -40,3 +40,4 @@ namespace IGWidget {
     }
 
 }
+#endif

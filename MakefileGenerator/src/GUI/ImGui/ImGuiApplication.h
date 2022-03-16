@@ -4,9 +4,9 @@
 #include "ImGui/imgui.h"
 
 // GUI windows
-#include "GUI/ImGui/ImGuiControlWindow.h"
-#include "GUI/ImGui/ImGuiSelectionWindow.h"
-#include "GUI/ImGui/ImGuiFileViewWindow.h"
+#include "GUI/ImGui/ApplicationWindows/ImGuiControlWindow.h"
+#include "GUI/ImGui/ApplicationWindows/ImGuiSelectionWindow.h"
+#include "GUI/ImGui/ApplicationWindows/ImGuiFileViewWindow.h"
 // Gui widgets
 #include "GUI/ImGui/Widgets/ImGuiWidgetColor.h"
 
@@ -15,15 +15,10 @@
 
 namespace IGA {
 
-    class Application
+    class Application : private ControlWindow, private SelectionWindow, private FileViewWindow
     {
     private:
         MG::GeneratorInfo m_GenInfo;
-        ControlWindow m_ControlWindow;
-        SelectionWindow m_SelectionWindow;
-        FileViewWindow m_FileViewWindow;
-
-        bool m_WillSaveConfig = false;
 
         // for styling
         const ImVec4 m_ColorDark = { 0.27f, 0.27f, 0.27f, 1.0f };
@@ -41,70 +36,13 @@ namespace IGA {
             IGWidget::WidgetColor(ImGuiCol_ButtonActive,   &m_ColorGrey)
         };
     private:
-        void ShowMenuBar() {
-            ImGui::BeginMainMenuBar();
-            if (ImGui::MenuItem("Save configuration") || m_WillSaveConfig)
-            {
-                if (!m_WillSaveConfig) {
-                    m_WillSaveConfig = true;
-                    // just to be able to still see this button
-                    ImGui::MenuItem("Load configuration");
-                    ImGui::EndMainMenuBar();
-                    return;
-                }
-                std::string filePath = FileDialog::SaveFileDialog();
-                if (filePath != "")
-                    MG::SaveConfigFile(m_GenInfo, filePath);
-                m_WillSaveConfig = false;
-            }
-            if (ImGui::MenuItem("Load configuration"))
-            {
-                std::string filePath = FileDialog::FileSelectionDialog();
-                MG::GeneratorInfo info = MG::LoadConfigFile(filePath);
-                m_SelectionWindow.SetGeneratorInfo(info);
-                m_ControlWindow.SetGeneratorInfo(info);
-            }
-            ImGui::EndMainMenuBar();
-        }
+        void Show() final override;
+        void ShowMenuBar();
+        void FillGeneratorInfo();
+        void SetGeneratorInfo(const MG::GeneratorInfo& info);
     public:
-        Application() : m_SelectionWindow(&m_GenInfo) {}
-
-        void Run()
-        {
-            if (m_SelectionWindow.WillGenerate() || m_WillSaveConfig) {
-                m_ControlWindow.FillGeneratorInfo(&m_GenInfo);
-                m_SelectionWindow.FillGeneratorInfo(&m_GenInfo);
-            }
-
-            IGWidget::PushStyleColors(m_StyleColors);
-            ShowMenuBar();
-            m_ControlWindow.Show();
-            m_SelectionWindow.Show();
-            m_FileViewWindow.Show();
-            IGWidget::PopStyleColors(m_StyleColors);
-        }
+        Application(const std::string& filePath);
+        void Run();
     };
-
-
-
-    //struct ControlWindowInfo
-    //{
-    //    int* selectedCompiler = nullptr;
-    //    int selectedBinaryFormat = 0;
-    //    bool* usePIL = nullptr;
-    //    std::string* ccompilerFlags = nullptr;
-    //    std::string* cppcompilerFlags = nullptr;
-    //    std::string* linkLibraries = nullptr;
-    //    std::string* makeFileOutput = nullptr;
-    //    std::string* outputDir = nullptr;
-    //    std::string* includeDirs = nullptr;
-    //    std::string* libraryDirs = nullptr;
-    //    std::string* outFileName = nullptr;
-    //};
-
-    //void StartApplication();
-    //void createControlWindow(ControlWindowInfo* cwi);
-    //void createFileViewControl(ControlWindowInfo* cwi);
-    //void createFileView();
 
 }

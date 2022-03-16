@@ -1,3 +1,4 @@
+#ifdef USING_IMGUI
 //========================================================================
 // GLFW 3.3 EGL - www.glfw.org
 //------------------------------------------------------------------------
@@ -787,4 +788,4 @@ GLFWAPI EGLSurface glfwGetEGLSurface(GLFWwindow* handle)
 
     return window->context.egl.surface;
 }
-
+#endif
