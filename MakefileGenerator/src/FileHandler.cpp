@@ -4,10 +4,9 @@
 #include <unordered_set>
 
 #include "FileHandler.h"
+#include "Generator.h"
 
 namespace FH {
-
-	//static std::vector<FileEntry> sg_FileEntries;
 
 	FileEntry::FileEntry(const std::string& str, const std::string& ext)
 		:  m_FileName(str), m_FileExtension(ext)
@@ -35,12 +34,12 @@ namespace FH {
 	void FileEntry::setFileExtension(const std::string& str) { m_FileExtension = str; }
 
 	bool& FileEntry::getSelectedRef()			{ return m_Selected;      }
-	bool FileEntry::isSelected()				{ return m_Selected;      }
-	bool FileEntry::isShown()					{ return m_Shown;         }
-	bool FileEntry::isDeleted()					{ return m_Deleted;       }
-	int  FileEntry::deletedID()					{ return m_DeletedID;     }
-	std::string& FileEntry::fileName()			{ return m_FileName;      }
-	std::string& FileEntry::extension()			{ return m_FileExtension; }
+	bool FileEntry::isSelected() const			{ return m_Selected;      }
+	bool FileEntry::isShown()    const			{ return m_Shown;         }
+	bool FileEntry::isDeleted()	 const			{ return m_Deleted;       }
+	int  FileEntry::deletedID()	 const			{ return m_DeletedID;     }
+	std::string FileEntry::fileName()  const	{ return m_FileName;      }
+	std::string FileEntry::extension() const	{ return m_FileExtension; }
 
 
 	FileEntryVec& GetFileEntriesRef()
@@ -153,8 +152,28 @@ namespace FH {
 	}
 
 
+	std::string GetHardDrive(const std::string& str) {
+		std::vector<std::string> filePath = MG::SplitStringByChar(str, ':');
+		if (filePath.size() == 0)
+			return "";
+		return filePath[0];
+	}
+
+
+	bool HardDrivesDontMatch(const std::string* const base_str, const char* const relative_str) {
+		#ifdef WIN32
+			if (GetHardDrive(*base_str) != GetHardDrive(relative_str))
+				return true;
+		#endif
+		return false;
+	}
+
+
 	std::string GetRelativePath(const std::string* const base_str, const char* const relative_str)
 	{
+		if (HardDrivesDontMatch(base_str, relative_str))
+			return relative_str;
+
 		std::filesystem::path base(*base_str);
 		std::filesystem::path relative(relative_str);
 		return std::filesystem::relative(relative, base).generic_string();

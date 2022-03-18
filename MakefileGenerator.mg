@@ -1,7 +1,7 @@
 Makefile-Generator.exe
 0
--D _GLFW_WIN32 -Ofast -s
--D USING_IMGUI -Ofast -s -Wl,--subsystem,windows
+-D USING_IMGUI -D _GLFW_WIN32 -Ofast -s  -static-libgcc -static-libstdc++
+-D USING_IMGUI -Ofast -s -Wl,--subsystem,windows  -static-libgcc -static-libstdc++
 -lopengl32 -lgdi32 -lole32 -luuid
 D:\Dev\MakefileGenerator
 
@@ -49,3 +49,4 @@ MakefileGenerator/icon/gcc.res|.res
 MakefileGenerator/src/Application.cpp|.cpp
 MakefileGenerator/src/GUI/ImGui/ApplicationWindows/ImGuiControlWindow.cpp|.cpp
 MakefileGenerator/src/GUI/ImGui/ApplicationWindows/ImGuiFileViewWindow.cpp|.cpp
+MakefileGenerator/src/GUI/ImGui/Widgets/ImGuiMessageBox.cpp|.cpp

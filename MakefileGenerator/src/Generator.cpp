@@ -8,6 +8,7 @@
 
 #include "Generator.h"
 #include "FileHandler.h"
+#include "Application.h"
 
 #include "Debug.h"
 
@@ -30,11 +31,10 @@ namespace MG {
 		rtrim(s);
 	}
 
-	inline std::string trimcp(std::string& s) {
-		std::string str = s;
-		ltrim(str);
-		rtrim(str);
-		return str;
+	inline std::string trimcp(std::string s) {
+		ltrim(s);
+		rtrim(s);
+		return s;
 	}
 
 	std::string WIN_OR_LINUX(const std::string& windows_case, const std::string& linux_case)
@@ -57,7 +57,7 @@ namespace MG {
 		std::string value;
 	};
 
-	std::vector<std::string> splitStringByChar(const std::string& str, char to_split)
+	std::vector<std::string> SplitStringByChar(const std::string& str, char to_split)
 	{
 		std::stringstream test(str);
 		std::string segment;
@@ -71,7 +71,7 @@ namespace MG {
 	}
 
 
-	std::pair<MakeFileVariable, MakeFileVariable> getCompiler(int selectedCompiler)
+	std::pair<MakeFileVariable, MakeFileVariable> GetCompiler(int selectedCompiler)
 	{
 		switch (selectedCompiler)
 		{
@@ -93,10 +93,10 @@ namespace MG {
 	}
 
 
-	MakeFileVariable createDirectoryPaths(const std::string& include_dirs, const std::string& identifier)
+	MakeFileVariable CreateDirectoryPaths(const std::string& include_dirs, const std::string& identifier)
 	{
 		std::string result;
-		std::vector<std::string> includeDirs = splitStringByChar(include_dirs, ';');
+		std::vector<std::string> includeDirs = SplitStringByChar(include_dirs, ';');
 		for (size_t i = 0; i < includeDirs.size(); ++i)
 			result.append("-" + identifier + includeDirs[i] + "/ ");
 
@@ -109,7 +109,7 @@ namespace MG {
 	}
 
 
-	std::string generateTarget(const std::string& targetName, const std::string& dependencies, const std::string& command)
+	std::string GenerateTarget(const std::string& targetName, const std::string& dependencies, const std::string& command)
 	{
 		std::string target = targetName + ": " + dependencies + "\n" + command;
 		return target;
@@ -123,7 +123,7 @@ namespace MG {
 	}
 
 
-	std::unordered_set<std::string> getAllSourceDirectories(FH::FileEntryVec& vec)
+	std::unordered_set<std::string> GetAllSourceDirectories(const FH::FileEntryVec& vec)
 	{
 		std::unordered_set<std::string> sourceDirs;
 		for (size_t i = 0; i < vec.size(); ++i)
@@ -141,7 +141,7 @@ namespace MG {
 	}
 
 
-	std::unordered_set<std::string> GetAllFileExtensions(FH::FileEntryVec& vec)
+	std::unordered_set<std::string> GetAllFileExtensions(const FH::FileEntryVec& vec)
 	{
 		std::unordered_set<std::string> fileExtensions;
 		for (auto& i : vec)
@@ -190,7 +190,7 @@ namespace MG {
 	};
 
 
-	std::pair<std::vector<BuildTargets>, MakeFileVariable> CreateFileVariables(const FileData& fd, FH::FileEntryVec& vec)
+	std::pair<std::vector<BuildTargets>, MakeFileVariable> CreateFileVariables(const FileData& fd, const FH::FileEntryVec& vec)
 	{
 		std::unordered_set<std::string> extensions = GetAllFileExtensions(vec);
 		std::vector<BuildTargets> ve;
@@ -224,7 +224,7 @@ namespace MG {
 					sourceFiles += j.fileName() + " ";
 			}
 
-			std::unordered_set<std::string> sourceDirs = getAllSourceDirectories(vec);
+			std::unordered_set<std::string> sourceDirs = GetAllSourceDirectories(vec);
 			for (auto& j : sourceDirs)
 			{
 				std::string compiler = i == ".c" ? fd.ccompiler.makeVariable : fd.cppcompiler.makeVariable;
@@ -288,11 +288,14 @@ namespace MG {
 	}
 
 
-	void WriteMakeFile(const FileData& fd, const std::string& makefileOutput, FH::FileEntryVec& vec)
+	void WriteMakeFile(const FileData& fd, const std::string& makefileOutput, const FH::FileEntryVec& vec)
 	{
-		std::ofstream makeFile(makefileOutput + "/makefile");
+		std::string makeFileOutputPath = makefileOutput + "/makefile";
+		std::ofstream makeFile(makeFileOutputPath);
 		if (!makeFile)
 		{
+			App::NotifyUser("Error", std::string("Unable create makefile: <" + makeFileOutputPath + ">\nIf you are on linux make sure "
+				"that you have the right privileges to create this file"), App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
 			return;
 		}
 
@@ -335,25 +338,29 @@ namespace MG {
 
 		makeFile << extensionTargets;
 
-		makeFile << generateTarget(fd.outFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.outFolder.makeVariable) << '\n';
-		makeFile << generateTarget(fd.intFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.intFolder.makeVariable) << "\n\n";
-		makeFile << generateTarget("clean", "", WIN_OR_LINUX("\trmdir /s /q ", "\trm -r ") + fd.outFolder.makeVariable);
+		makeFile << GenerateTarget(fd.outFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.outFolder.makeVariable) << '\n';
+		makeFile << GenerateTarget(fd.intFolder.makeVariable, "", WIN_OR_LINUX("\tmkdir ", "\tmkdir -p") + fd.intFolder.makeVariable) << "\n\n";
+		makeFile << GenerateTarget("clean", "", WIN_OR_LINUX("\trmdir /s /q ", "\trm -r ") + fd.outFolder.makeVariable);
 		makeFile.close();
 	}
 
 
-	void GenerateMakeFile(GeneratorInfo info)
+	void GenerateMakeFile(const GeneratorInfo& info)
 	{
-		if (info.makeFileOutput == "" || info.files.size() == 0)
+		if (info.makeFileOutput == "" || info.files.size() == 0) {
+			App::NotifyUser("Error", "Couldn't generate a makefile, either because no files were selected, "
+				"or because no output directory has been set for the makefile."
+				"Make sure both of these inputs are valid", App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
 			return;
+		}
 
-		std::pair<MakeFileVariable, MakeFileVariable> compiler = getCompiler(info.selectedCompiler);
+		std::pair<MakeFileVariable, MakeFileVariable> compiler = GetCompiler(info.selectedCompiler);
 		MakeFileVariable ccompiler = compiler.first;
 		MakeFileVariable ccompilerFlags("$(CFLAGS)", "CFLAGS", info.ccompilerFlags);
 		MakeFileVariable cppcompiler = compiler.second;
 		MakeFileVariable cppcompilerFlags("$(CXXFLAGS)", "CXXFLAGS", info.cppcompilerFlags);
-		MakeFileVariable includeDirectories = createDirectoryPaths(info.includeDirs, "I");
-		MakeFileVariable libraryDirectories = createDirectoryPaths(info.libraryDirs, "L");
+		MakeFileVariable includeDirectories = CreateDirectoryPaths(info.includeDirs, "I");
+		MakeFileVariable libraryDirectories = CreateDirectoryPaths(info.libraryDirs, "L");
 		MakeFileVariable libraries("$(LIBRARIES)", "LIBRARIES", info.linkLibraries);
 
 		MakeFileVariable outFile("$(EXE)", "EXE", info.outFileName == "" ? "MyOutput" : info.outFileName);
@@ -377,9 +384,15 @@ namespace MG {
 	}
 
 
-	void SaveConfigFile(GeneratorInfo info, const std::string& file_path)
+	void SaveConfigFile(const GeneratorInfo& info, const std::string& file_path)
 	{
 		std::ofstream configFile(file_path);
+		if (!configFile) {
+			App::NotifyUser("Error", std::string("Unable to create config file: <" + file_path + ">\nIf you are on linux make sure "
+				"that you have the right privileges to create this file"), App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
+			return;
+		}
+
 		configFile << trimcp(info.outFileName) << '\n';
 		configFile << info.selectedCompiler << '\n';
 		configFile << trimcp(info.ccompilerFlags) << '\n';
@@ -410,7 +423,8 @@ namespace MG {
 		GeneratorInfo info;
 		std::ifstream configFile(file_path);
 		if (!configFile) {
-			DEBUG_PRINT_NL("[LoadConfigFile] [ERROR] Unable to open input file: " << file_path);
+			App::NotifyUser("Error", std::string("Unable to load config file: <" + file_path + ">"), App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
+			return info;
 		}
 		std::string line;
 		size_t counter = 0;
@@ -463,7 +477,7 @@ namespace MG {
 				info.usePIL = std::stoi(line);
 				break;
 			default:
-				std::vector<std::string> file_with_extension = splitStringByChar(line, '|');
+				std::vector<std::string> file_with_extension = SplitStringByChar(line, '|');
 				info.files.push_back({ file_with_extension[0], file_with_extension[1] });
 				break;
 			}

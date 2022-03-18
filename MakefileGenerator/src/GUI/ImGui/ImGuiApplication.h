@@ -33,7 +33,7 @@ namespace IGA {
             IGWidget::WidgetColor(ImGuiCol_HeaderHovered,  &m_ColorGrey),
             IGWidget::WidgetColor(ImGuiCol_Button,         &m_ColorDark),
             IGWidget::WidgetColor(ImGuiCol_ButtonHovered,  &m_ColorGrey),
-            IGWidget::WidgetColor(ImGuiCol_ButtonActive,   &m_ColorGrey)
+            IGWidget::WidgetColor(ImGuiCol_ButtonActive,   &m_ColorGrey),
         };
     private:
         void Show() final override;

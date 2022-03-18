@@ -1,5 +1,6 @@
 #ifdef USING_IMGUI
 #include "GUI/ImGui/ImGuiApplication.h"
+#include "GUI/ImGui/Widgets/ImGuiMessageBox.h"
 
 // using ImGui --------------------------------------------------------
 namespace IGA {
@@ -24,8 +25,10 @@ namespace IGA {
         if (ImGui::MenuItem("Load configuration"))
         {
             std::string filePath = FileDialog::FileSelectionDialog();
-            MG::GeneratorInfo info = MG::LoadConfigFile(filePath);
-            SetGeneratorInfo(info);
+            if (filePath != "") {
+                MG::GeneratorInfo info = MG::LoadConfigFile(filePath);
+                SetGeneratorInfo(info);
+            }
         }
         ImGui::EndMainMenuBar();
     }
@@ -34,6 +37,7 @@ namespace IGA {
     void Application::Run()
     {
         IGWidget::PushStyleColors(m_StyleColors);
+        IGWidget::MessageBox::RenderBoxes();
         ShowMenuBar();
         ControlWindow::Show();
         Show();
@@ -101,7 +105,6 @@ namespace IGA {
         m_GenInfo.usePIL = m_UsePIL.Checked();
         m_GenInfo.selectedBinaryFormat = m_SelectedBinFormat.SelectedItem();
         m_GenInfo.dllFileName = m_DllFileNameInput.Input();
-        m_GenInfo.selectedAll = m_SelectAll.Checked();
 
         // File view
         FH::FileEntryVec& fileEntries = FH::GetFileEntriesRef();
@@ -126,7 +129,6 @@ namespace IGA {
         m_UsePIL.SetState(info.usePIL);
         m_SelectedBinFormat.SetSelectedItem(info.selectedBinaryFormat);
         m_DllFileNameInput.SetInput(info.dllFileName);
-        m_SelectAll.SetState(info.selectedAll);
 
         // File view
         FH::FileEntryVec& fileEntries = FH::GetFileEntriesRef();

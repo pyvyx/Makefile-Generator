@@ -3,7 +3,7 @@
 
 namespace IGWidget {
 
-	class WidgetStatus
+	class Widget
 	{
 	public:
 		inline bool IsHovered() const { return ImGui::IsItemHovered(); }

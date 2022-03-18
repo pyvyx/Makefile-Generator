@@ -91,11 +91,13 @@ namespace IGW {
         ImGui::CreateContext();
 
         ImGuiIO& io = ImGui::GetIO();
+        //io.ConfigFlags |= ImGuiPopupFlags;
         io.Fonts->AddFontFromMemoryCompressedTTF(sg_ArialCompressedData, sg_ArialCompressedSize, 19);
         io.IniFilename = iniFileName;
 
         ImGuiStyle& style = ImGui::GetStyle();
         style.FrameRounding = 5.f;
+        //style.WindowRounding = 5.f;
 
         ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
         ImGui_ImplOpenGL3_Init("#version 130");

@@ -8,6 +8,7 @@ namespace IGWidget {
 
     Button::Button() : m_Label("") {}
     Button::Button(const char* label) : m_Label(label) {}
+    Button::Button(const char* label, const ImVec2& pos, const ImVec2& size) : m_Label(label), pos(pos), size(size) {}
 
     bool Button::clicked(const char* label)
     {
@@ -15,7 +16,7 @@ namespace IGWidget {
         return ImGui::Button(label, size);
     }
 
-    bool Button::clicked()
+    bool Button::clicked() const
     {
         //ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.33f, 0.33f, 0.33f, 1.0f });
         ImGui::SetCursorPos(pos);
