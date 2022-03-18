@@ -15,7 +15,7 @@ namespace IGWidget {
 	{
 	private:
 		const char* m_Title;
-		const char* m_Message;
+		std::string m_Message;
 		bool m_Show = true;
 		uint8_t m_TitleColor;
 		ImVec4 m_TitleColorVec;
@@ -30,7 +30,7 @@ namespace IGWidget {
 		void SetTitleBarColor(uint8_t color);
 	public:
 		static void RenderBoxes();
-		MessageBox(const char* title, const char* message, const App::MessageBoxCallbacks& callbacks, uint8_t color = static_cast<uint8_t>(App::WidgetColor::NORMAL));
+		MessageBox(const char* title, const std::string& message, const App::MessageBoxCallbacks& callbacks, uint8_t color = static_cast<uint8_t>(App::WidgetColor::NORMAL));
 		MessageBox& operator=(const MessageBox& mb);
 
 		void Show();

@@ -11,7 +11,9 @@ int main(int argc, char** argv)
 	if (ip.error)
 		return EXIT_INPUT_ERROR;
 
-	if (!App::StartApplication(ip.guiMode, ip.filePath))
+	if (!App::StartApplication(ip.guiMode, ip.filePath)) {
+		std::cout << "[Error] Trying to start the application" << std::endl;
 		return EXIT_APP_ERROR;
+	}
 	return EXIT_SUCCESS;
 }

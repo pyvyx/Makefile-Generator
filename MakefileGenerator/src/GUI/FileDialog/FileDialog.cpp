@@ -5,6 +5,7 @@
 
 #include "FileDialog.h"
 #include "FileHandler.h"
+#include "Application.h"
 
 #include "Debug.h"
 
@@ -33,6 +34,7 @@ namespace FileDialog {
         // error opening the file
         else
         {
+            App::NotifyUser("Error", std::string("Opening multiple file dialog window <" + std::string(NFD_GetError()) + ">"), App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
             DEBUG_PRINT_NL("[NFD][Error] Error opening mulitple file dialog " << NFD_GetError())
             return false;
         }
@@ -78,6 +80,7 @@ namespace FileDialog {
         // error opening the file
         else
         {
+            App::NotifyUser("Error", "Opening pick folder dialog <" + std::string(NFD_GetError()) + ">", App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
             DEBUG_PRINT_NL("[NFD][Error] Error opening pick folder dialog " << NFD_GetError())
             return false;
         }
@@ -102,6 +105,7 @@ namespace FileDialog {
         // error opening the file
         else
         {
+            App::NotifyUser("Error", "Opening save file dialog <" + std::string(NFD_GetError()) + ">", App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
             DEBUG_PRINT_NL("[NFD][Error] Error opening save file dialog" << NFD_GetError())
         }
         return "";
@@ -126,6 +130,7 @@ namespace FileDialog {
         // error opening the file
         else
         {
+            App::NotifyUser("Error", "Opening file selection dialog <" + std::string(NFD_GetError()) + ">", App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
             DEBUG_PRINT_NL("[NFD][Error] Error opening file selection dialog" << NFD_GetError())
         }
         return "";

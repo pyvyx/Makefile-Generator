@@ -28,11 +28,11 @@ namespace App {
     }
 
 
-    void NotifyUser(const char* type, const char* message, const MessageBoxCallbacks& callbacks, uint8_t color) {
+    void NotifyUser(const char* type, const std::string& message, const MessageBoxCallbacks& callbacks, uint8_t color) {
 
         if (!sg_UsingGui) {
             // std::endl is intentional
-            std::cout << type << ' ' << message << std::endl;
+            std::cout << '[' << type << "] " << message << std::endl;
         }
 
         #ifdef USING_IMGUI

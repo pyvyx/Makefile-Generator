@@ -15,5 +15,5 @@ namespace App {
     };
 
     bool StartApplication(bool usingGui, const std::string& filePath);
-    void NotifyUser(const char* type, const char* message, const MessageBoxCallbacks& callbacks, uint8_t color = static_cast<uint8_t>(WidgetColor::NORMAL));
+    void NotifyUser(const char* type, const std::string& message, const MessageBoxCallbacks& callbacks, uint8_t color = static_cast<uint8_t>(WidgetColor::NORMAL));
 }

@@ -25,8 +25,10 @@ namespace IGA {
         if (ImGui::MenuItem("Load configuration"))
         {
             std::string filePath = FileDialog::FileSelectionDialog();
-            MG::GeneratorInfo info = MG::LoadConfigFile(filePath);
-            SetGeneratorInfo(info);
+            if (filePath != "") {
+                MG::GeneratorInfo info = MG::LoadConfigFile(filePath);
+                SetGeneratorInfo(info);
+            }
         }
         ImGui::EndMainMenuBar();
     }

@@ -39,7 +39,7 @@ namespace IGWidget {
 	}
 
 
-	MessageBox::MessageBox(const char* title, const char* message, const App::MessageBoxCallbacks& callbacks, uint8_t color)
+	MessageBox::MessageBox(const char* title, const std::string& message, const App::MessageBoxCallbacks& callbacks, uint8_t color)
 		: m_Title(title), m_Message(message), m_Callbacks(callbacks), m_TitleColor(color) {
 		SetTitleBarColor(color);
 		sm_Boxes.push_back(*this);
@@ -82,7 +82,7 @@ namespace IGWidget {
 
 		ImGui::Begin(m_Title, (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
-		ImGui::TextWrapped(m_Message);
+		ImGui::TextWrapped(m_Message.c_str());
 
 		if (m_OkBtn.clicked()) {
 			if(m_Callbacks.m_OnOkClicked != nullptr)

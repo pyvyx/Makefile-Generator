@@ -290,9 +290,12 @@ namespace MG {
 
 	void WriteMakeFile(const FileData& fd, const std::string& makefileOutput, const FH::FileEntryVec& vec)
 	{
-		std::ofstream makeFile(makefileOutput + "/makefile");
+		std::string makeFileOutputPath = makefileOutput + "/makefile";
+		std::ofstream makeFile(makeFileOutputPath);
 		if (!makeFile)
 		{
+			App::NotifyUser("Error", std::string("Unable create makefile: <" + makeFileOutputPath + ">\nIf you are on linux make sure "
+				"that you have the right privileges to create this file"), App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
 			return;
 		}
 
@@ -384,6 +387,12 @@ namespace MG {
 	void SaveConfigFile(const GeneratorInfo& info, const std::string& file_path)
 	{
 		std::ofstream configFile(file_path);
+		if (!configFile) {
+			App::NotifyUser("Error", std::string("Unable to create config file: <" + file_path + ">\nIf you are on linux make sure "
+				"that you have the right privileges to create this file"), App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
+			return;
+		}
+
 		configFile << trimcp(info.outFileName) << '\n';
 		configFile << info.selectedCompiler << '\n';
 		configFile << trimcp(info.ccompilerFlags) << '\n';
@@ -414,7 +423,8 @@ namespace MG {
 		GeneratorInfo info;
 		std::ifstream configFile(file_path);
 		if (!configFile) {
-			DEBUG_PRINT_NL("[LoadConfigFile] [ERROR] Unable to open input file: " << file_path);
+			App::NotifyUser("Error", std::string("Unable to load config file: <" + file_path + ">"), App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
+			return info;
 		}
 		std::string line;
 		size_t counter = 0;
