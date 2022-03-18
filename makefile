@@ -1,11 +1,12 @@
 CCOMP=gcc
-CFLAGS=-D USING_IMGUI -D _GLFW_WIN32 -Ofast -s
+CFLAGS=-fPIC -D USING_IMGUI -D _GLFW_WIN32 -Ofast -s  -static-libgcc -static-libstdc++
 CXXCOMP=g++
-CXXFLAGS=-D USING_IMGUI -Ofast -s -Wl,--subsystem,windows
+CXXFLAGS=-fPIC -D USING_IMGUI -Ofast -s -Wl,--subsystem,windows  -static-libgcc -static-libstdc++
 INCLUDEDIRS=-IDependencies/GLFW/include/ -IDependencies/ImGui/include/ImGui/ -IDependencies/ImGui/include/ -IDependencies/nativefiledialog/include/ -IDependencies/nativefiledialog/include/nfd/ -IMakefileGenerator/vendor/ -IMakefileGenerator/src/ 
 LIBRARYDIRS=
 LIBRARIES=-lopengl32 -lgdi32 -lole32 -luuid
 EXE=Makefile-Generator.exe
+SHAREDLIB=libmake.a
 OUTPUTFOLDER=Out
 INTFOLDER=Out\BIN
 RESFILES=MakefileGenerator/icon/gcc.res 
@@ -23,7 +24,7 @@ build: $(OUTPUTFOLDER) $(INTFOLDER) $(OUTPUTFOLDER)/$(EXE)
 rebuild: clean build
 
 $(OUTPUTFOLDER)/$(EXE): $(OBJFILESc) $(OBJFILEScpp) 
-	$(CXXCOMP) $(CXXFLAGS) $(LIBRARIES) $(OBJFILESc) $(OBJFILEScpp)  -o $(OUTPUTFOLDER)/$(EXE) $(LIBRARYDIRS) $(LIBRARIES) $(LIBRARIES) $(RESFILES)
+	$(CXXCOMP) -shared -Wl,--out-implib,$(OUTPUTFOLDER)/$(SHAREDLIB) $(LIBRARIES) $(OBJFILESc) $(OBJFILEScpp) -o $(OUTPUTFOLDER)/$(EXE) $(LIBRARYDIRS) $(LIBRARIES) $(LIBRARIES)
 
 
 $(INTFOLDER)/%.o: MakefileGenerator/src/GUI/ImGui/Widgets/%.c
