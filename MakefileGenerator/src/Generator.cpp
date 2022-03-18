@@ -8,6 +8,7 @@
 
 #include "Generator.h"
 #include "FileHandler.h"
+#include "Application.h"
 
 #include "Debug.h"
 
@@ -343,8 +344,12 @@ namespace MG {
 
 	void GenerateMakeFile(const GeneratorInfo& info)
 	{
-		if (info.makeFileOutput == "" || info.files.size() == 0)
+		if (info.makeFileOutput == "" || info.files.size() == 0) {
+			App::NotifyUser("Error", "Couldn't generate a makefile, either because no files were selected, "
+				"or because no output directory has been set for the makefile."
+				"Make sure both of these inputs are valid", App::MessageBoxCallbacks(), static_cast<uint8_t>(App::WidgetColor::RED));
 			return;
+		}
 
 		std::pair<MakeFileVariable, MakeFileVariable> compiler = GetCompiler(info.selectedCompiler);
 		MakeFileVariable ccompiler = compiler.first;

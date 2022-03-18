@@ -14,9 +14,10 @@ namespace IGWidget {
     public:
         Button();
         Button(const char* label);
+        Button(const char* label, const ImVec2& pos, const ImVec2& size);
 
         bool clicked(const char* label);
-        bool clicked();
+        bool clicked() const;
         bool clicked(float sameLineOffset);
         void resetPosSize(const ImVec2& ws, float y_offset);
     };

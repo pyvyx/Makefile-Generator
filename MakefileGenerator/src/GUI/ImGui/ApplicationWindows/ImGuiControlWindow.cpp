@@ -1,7 +1,9 @@
 #ifdef USING_IMGUI
 #include "ImGuiControlWindow.h"
+#include "GUI/ImGui/Widgets/ImGuiMessageBox.h"
 
 #include "FileHandler.h"
+#include "Application.h"
 
 namespace IGA {
 
@@ -27,7 +29,6 @@ namespace IGA {
         if (m_MakeFileOutputPathInput.input != "") {
             basePath = &m_MakeFileOutputPathInput.input;
         }
-
 
         m_OutputFileNameInput.added();
         m_MakeFileOutputPathInput.added();

@@ -1,5 +1,6 @@
 #ifdef USING_IMGUI
 #include "GUI/ImGui/ImGuiApplication.h"
+#include "GUI/ImGui/Widgets/ImGuiMessageBox.h"
 
 // using ImGui --------------------------------------------------------
 namespace IGA {
@@ -34,6 +35,7 @@ namespace IGA {
     void Application::Run()
     {
         IGWidget::PushStyleColors(m_StyleColors);
+        IGWidget::MessageBox::RenderBoxes();
         ShowMenuBar();
         ControlWindow::Show();
         Show();

@@ -238,7 +238,7 @@ Input HandleInput(int argc, char** argv) {
 
 	#ifndef USING_IMGUI
 	if (usingGuiMode) {
-		std::cout << "You don't have the gui mode installed! Recompile the program to get access to the gui mode\n";
+		App::NotifyUser("Error", "You don't have the gui mode installed! Recompile the program to get access to the gui mode");
 		error = true;
 	}
 	#endif
