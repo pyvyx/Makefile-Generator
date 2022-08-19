@@ -9,8 +9,8 @@ namespace IGA {
 
     //public
     ControlWindow::ControlWindow() 
-        : m_Buttons({ &m_SelectFiles, &m_SelectLibraryDirs, &m_SelectIncludeDirs, &m_SelectOutputDir, &m_SelectMakeFileOutputPath }),
-        m_TextInputs({ &m_SearchInput, &m_LibraryDirsInput, &m_IncludeDirsInput, &m_OutputDirInput, &m_MakeFileOutputPathInput, &m_LibrariesInput, &m_CppcompilerFlagsInput, &m_CcompilerFlagsInput, &m_OutputFileNameInput })
+        : m_Buttons({ { &m_SelectFiles, &m_SelectLibraryDirs, &m_SelectIncludeDirs, &m_SelectOutputDir, &m_SelectMakeFileOutputPath }}),
+        m_TextInputs({ { &m_SearchInput, &m_LibraryDirsInput, &m_IncludeDirsInput, &m_OutputDirInput, &m_MakeFileOutputPathInput, &m_LibrariesInput, &m_CppcompilerFlagsInput, &m_CcompilerFlagsInput, &m_OutputFileNameInput }})
         {}
 
 
@@ -87,7 +87,7 @@ namespace IGA {
         ImGui::SetNextWindowSize(ws);
         ImGui::SetNextWindowPos(window_pos);
 
-        float btn_offset = ((ws.y - ((m_TextInputs.size()) * IGWidget::sg_ButtonSize.y)) / ((m_TextInputs.size() + 1))) + IGWidget::sg_ButtonSize.y;
+        float btn_offset = ((ws.y - (static_cast<float>(m_TextInputs.size()) * IGWidget::sg_ButtonSize.y)) / (static_cast<float>(m_TextInputs.size() + 1))) + IGWidget::sg_ButtonSize.y;
         float offset = btn_offset;
         for (size_t i = 0; i < m_Buttons.size(); ++i)
         {

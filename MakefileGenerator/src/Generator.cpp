@@ -37,12 +37,11 @@ namespace MG {
 		return s;
 	}
 
-	std::string WIN_OR_LINUX(const std::string& windows_case, const std::string& linux_case)
+	std::string WIN_OR_LINUX(const std::string& windows_case, [[maybe_unused]]const std::string& linux_case)
 	{
 		#ifdef _WIN32
 			return windows_case;
-		#endif
-		#if defined linux || defined __APPLE__
+		#elif defined linux || defined __APPLE__
 			return linux_case;
 		#endif
 	}

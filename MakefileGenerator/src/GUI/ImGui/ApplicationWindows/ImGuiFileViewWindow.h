@@ -13,6 +13,7 @@ namespace IGA {
 	class FileViewWindow
 	{
 	public:
+		virtual ~FileViewWindow() = default;
 		virtual void Show();
 	};
 

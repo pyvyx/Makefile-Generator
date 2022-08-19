@@ -20,6 +20,8 @@ filter { "platforms:x86" }
     architecture "x86"
     defines "X86"
 
+filter "system:windows"
+    defines "WINDOWS"
 
 filter { "configurations:Debug" }
     runtime "Debug"

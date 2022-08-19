@@ -161,7 +161,7 @@ namespace FH {
 
 
 	bool HardDrivesDontMatch(const std::string* const base_str, const char* const relative_str) {
-		#ifdef WIN32
+		#ifdef WINDOWS
 			if (GetHardDrive(*base_str) != GetHardDrive(relative_str))
 				return true;
 		#endif

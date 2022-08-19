@@ -44,6 +44,7 @@ namespace IGA {
         void Resize();
     public:
         ControlWindow();
+        virtual ~ControlWindow() = default;
         virtual void Show();
     };
 

@@ -16,6 +16,7 @@ project "MakefileGenerator"
     }
 
     externalincludedirs {
+        "vendor",
         "../Dependencies/imgui/include"
     }
 
@@ -31,18 +32,9 @@ project "MakefileGenerator"
 
     -- gcc* clang* msc*
     filter "toolset:msc*"
-        warnings "Everything"
+        warnings "High"
         externalwarnings "Default" -- Default
-        disablewarnings { 
-            "4820", -- disable warning C4820: 'added padding'
-            "4626", -- C6264 assignment operator was deleted
-            "5027", -- C5027 move assignment operator was deleted
-            "5045", -- C5045 Spectre mitigation
-            "4710", -- C4710 function not inlined
-            "4711", -- C4711 function 'function' selected for automatic inline expansion
-            "4191" -- C4191 pointer conversion e.g. reinterpret_cast is unsafe
-            --"4201"  -- C4201 nonstandard extension used: nameless struct/union
-        }
+        disablewarnings {}
         buildoptions { "/sdl" }
         defines "MSC"
 

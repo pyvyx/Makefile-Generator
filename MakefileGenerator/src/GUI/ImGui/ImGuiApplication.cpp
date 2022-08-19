@@ -5,7 +5,7 @@
 // using ImGui --------------------------------------------------------
 namespace IGA {
 
-    Application::Application(const std::string& filePath) : SelectionWindow(&m_GenInfo), ControlWindow()  {
+    Application::Application(const std::string& filePath) : ControlWindow(), SelectionWindow(&m_GenInfo)  {
         if (filePath != "") {
             MG::GeneratorInfo info = MG::LoadConfigFile(filePath);
             SetGeneratorInfo(info);

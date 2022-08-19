@@ -8,7 +8,7 @@ namespace IGWidget {
 
     Button::Button() : m_Label("") {}
     Button::Button(const char* label) : m_Label(label) {}
-    Button::Button(const char* label, const ImVec2& pos, const ImVec2& size) : m_Label(label), pos(pos), size(size) {}
+    Button::Button(const char* label, const ImVec2& pos, const ImVec2& size) :  pos(pos), size(size), m_Label(label) {}
 
     bool Button::clicked(const char* label)
     {

@@ -22,9 +22,9 @@ namespace App {
 
         #ifdef USING_IMGUI
             return IGW::StartWindow(filePath);
+        #else
+            return false;
         #endif
-
-        return false;
     }
 
 

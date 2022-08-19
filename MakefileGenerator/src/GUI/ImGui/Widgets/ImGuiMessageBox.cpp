@@ -40,7 +40,7 @@ namespace IGWidget {
 
 
 	MessageBox::MessageBox(const char* title, const std::string& message, const App::MessageBoxCallbacks& callbacks, uint8_t color)
-		: m_Title(title), m_Message(message), m_Callbacks(callbacks), m_TitleColor(color) {
+		: m_Title(title), m_Message(message), m_TitleColor(color), m_Callbacks(callbacks) {
 		SetTitleBarColor(color);
 		sm_Boxes.push_back(*this);
 	}
