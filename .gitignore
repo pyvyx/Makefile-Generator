@@ -2,9 +2,11 @@
 .vs/
 
 BIN/
-Out/
-Test/
+
+Makefile
+*.make
 
 *.user
+*.vcxproj
 *.vcxproj.user
 *.vcxproj.filters
