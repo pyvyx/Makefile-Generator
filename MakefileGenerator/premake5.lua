@@ -21,14 +21,22 @@ project "MakefileGenerator"
     }
 
     flags "FatalWarnings"
-
+    
     links {
         "glfw",
         "nativefiledialog",
-        "ImGui",
-        "gdi32",
-        "opengl32"
+        "ImGui"
     }
+
+    filter "system:windows"
+        links {
+            "gdi32",
+            "opengl32"
+        }
+
+    filter "system:macosx"
+        defines "GL_SILENCE_DEPRECATION"
+        linkoptions "-framework AppKit -framework iokit -framework OpenGl"
 
     -- gcc* clang* msc*
     filter "toolset:msc*"
@@ -48,11 +56,9 @@ project "MakefileGenerator"
             "init-self",
             "missing-declarations",
             "missing-include-dirs",
-            "old-style-cast",
             "overloaded-virtual",
             "redundant-decls",
             "shadow",
-            "sign-conversion",
             "sign-promo",
             "strict-overflow=5",
             "switch-default",
@@ -63,11 +69,18 @@ project "MakefileGenerator"
             "alloca",
             "conversion",
             "deprecated",
-            "format-security",
             "null-dereference",
             "stack-protector",
             "vla",
             "shift-overflow"
+        }
+        disablewarnings { 
+            "unused-parameter",
+            "format-security",
+            "deprecated-copy-with-user-provided-dtor",
+            "deprecated-copy-with-user-provided-copy",
+            "ignored-qualifiers",
+            "sign-conversion" 
         }
 
     filter "toolset:gcc*"

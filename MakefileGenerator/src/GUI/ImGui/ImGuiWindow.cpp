@@ -29,6 +29,13 @@ namespace IGW {
             return;
         }
 
+        #ifdef MAC_OS
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        #endif
+
         // Create window with graphics context
         m_Window = glfwCreateWindow(width, height, title, monitor, share);
         if (m_Window == NULL)
@@ -41,11 +48,13 @@ namespace IGW {
         const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         glfwSetWindowPos(m_Window, (mode->width - width) / 2, (mode->height - height) / 2);
 
-        // set window icon
-        GLFWimage icon_s;
-        icon_s.pixels = stbi_load_from_memory(sg_RawIconData, sg_IconSize, &icon_s.width, &icon_s.height, NULL, 4);
-        glfwSetWindowIcon(m_Window, 1, &icon_s);
-        stbi_image_free(icon_s.pixels);
+        #if defined(WINDOWS) || defined(LINUX)
+            // set window icon
+            GLFWimage icon_s;
+            icon_s.pixels = stbi_load_from_memory(sg_RawIconData, sg_IconSize, &icon_s.width, &icon_s.height, NULL, 4);
+            glfwSetWindowIcon(m_Window, 1, &icon_s);
+            stbi_image_free(icon_s.pixels);
+        #endif
 
         // set window pointer and callbacks
         Window* window = GetWindowPtr();
@@ -100,7 +109,15 @@ namespace IGW {
         //style.WindowRounding = 5.f;
 
         ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
-        ImGui_ImplOpenGL3_Init("#version 130");
+        #ifdef MAC_OS
+            if (!ImGui_ImplOpenGL3_Init("#version 330 core"))
+        #else
+            if (!ImGui_ImplOpenGL3_Init("#version 130"))
+        #endif
+        {
+            std::cout << "[ERROR] Failed to initialize ImGui OpenGL3 implementation" << std::endl;
+            return ;
+        }
         ImGui::StyleColorsDark();
     }
 
