@@ -31,7 +31,10 @@ project "MakefileGenerator"
     filter "system:windows"
         links {
             "gdi32",
-            "opengl32"
+            "opengl32",
+            "shell32",
+            "ole32",
+            "uuid"
         }
 
     filter "system:macosx"
@@ -44,7 +47,6 @@ project "MakefileGenerator"
         externalwarnings "Default" -- Default
         disablewarnings {}
         buildoptions { "/sdl" }
-        defines "MSC"
 
     filter { "toolset:gcc* or toolset:clang*" }
         enablewarnings {
@@ -58,9 +60,7 @@ project "MakefileGenerator"
             "missing-include-dirs",
             "overloaded-virtual",
             "redundant-decls",
-            "shadow",
             "sign-promo",
-            "strict-overflow=5",
             "switch-default",
             "undef",
             "uninitialized",
@@ -77,10 +77,12 @@ project "MakefileGenerator"
         disablewarnings { 
             "unused-parameter",
             "format-security",
+            "format-nonliteral",
             "deprecated-copy-with-user-provided-dtor",
             "deprecated-copy-with-user-provided-copy",
             "ignored-qualifiers",
-            "sign-conversion" 
+            "sign-conversion",
+            "missing-declarations"
         }
 
     filter "toolset:gcc*"
@@ -91,7 +93,6 @@ project "MakefileGenerator"
             "noexcept",
             "strict-null-sentinel",
             "array-bounds=2",
-            "duplicated-branches",
             "duplicated-cond",
             "logical-op",
             "arith-conversion",
@@ -99,7 +100,6 @@ project "MakefileGenerator"
             "implicit-fallthrough=3",
             "trampolines"
         }
-        defines "GCC"
 
     filter "toolset:clang*"
         warnings "Extra"
@@ -109,7 +109,6 @@ project "MakefileGenerator"
             "long-long",
             "implicit-fallthrough", 
         }
-        defines "CLANG"
     filter {}
 
 
