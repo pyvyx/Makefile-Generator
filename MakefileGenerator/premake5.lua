@@ -10,25 +10,45 @@ project "MakefileGenerator"
     includedirs {
         "src",
         "vendor",
-        "../Dependencies/glfw/include",
-        "../Dependencies/imgui/include",
+        "../Dependencies/GLFW/include",
+        "../Dependencies/ImGui/include",
         "../Dependencies/nativefiledialog/include"
     }
 
     externalincludedirs {
         "vendor",
-        "../Dependencies/imgui/include"
+        "../Dependencies/ImGui/include"
     }
 
     flags "FatalWarnings"
-
+    
     links {
         "glfw",
         "nativefiledialog",
-        "ImGui",
-        "gdi32",
-        "opengl32"
+        "ImGui"
     }
+
+    filter "system:windows"
+        links {
+            "gdi32",
+            "opengl32",
+            "shell32",
+            "ole32",
+            "uuid"
+        }
+
+    filter "system:linux"
+        links {
+            "GL",
+            "gtk-3",
+            "glib-2.0",
+            "gobject-2.0",
+            "X11"
+        }
+
+    filter "system:macosx"
+        defines "GL_SILENCE_DEPRECATION"
+        linkoptions "-framework AppKit -framework iokit -framework OpenGl"
 
     -- gcc* clang* msc*
     filter "toolset:msc*"
@@ -36,7 +56,6 @@ project "MakefileGenerator"
         externalwarnings "Default" -- Default
         disablewarnings {}
         buildoptions { "/sdl" }
-        defines "MSC"
 
     filter { "toolset:gcc* or toolset:clang*" }
         enablewarnings {
@@ -48,13 +67,9 @@ project "MakefileGenerator"
             "init-self",
             "missing-declarations",
             "missing-include-dirs",
-            "old-style-cast",
             "overloaded-virtual",
             "redundant-decls",
-            "shadow",
-            "sign-conversion",
             "sign-promo",
-            "strict-overflow=5",
             "switch-default",
             "undef",
             "uninitialized",
@@ -63,12 +78,27 @@ project "MakefileGenerator"
             "alloca",
             "conversion",
             "deprecated",
-            "format-security",
             "null-dereference",
             "stack-protector",
             "vla",
             "shift-overflow"
         }
+        disablewarnings { 
+            "unused-parameter",
+            "format-security",
+            "format-nonliteral",
+            "ignored-qualifiers",
+            "sign-conversion",
+            "missing-declarations"
+        }
+
+
+    filter { "toolset:gcc* or toolset:clang*", "system:macosx" }
+            disablewarnings {
+                "deprecated-copy-with-user-provided-dtor",
+                "deprecated-copy-with-user-provided-copy"
+            }
+
 
     filter "toolset:gcc*"
         warnings "Extra"
@@ -78,7 +108,6 @@ project "MakefileGenerator"
             "noexcept",
             "strict-null-sentinel",
             "array-bounds=2",
-            "duplicated-branches",
             "duplicated-cond",
             "logical-op",
             "arith-conversion",
@@ -86,7 +115,6 @@ project "MakefileGenerator"
             "implicit-fallthrough=3",
             "trampolines"
         }
-        defines "GCC"
 
     filter "toolset:clang*"
         warnings "Extra"
@@ -96,7 +124,10 @@ project "MakefileGenerator"
             "long-long",
             "implicit-fallthrough", 
         }
-        defines "CLANG"
+        disablewarnings {
+            "deprecated-copy-with-user-provided-dtor",
+            "deprecated-copy-with-user-provided-copy"
+        }
     filter {}
 
 

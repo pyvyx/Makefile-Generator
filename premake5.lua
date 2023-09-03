@@ -1,17 +1,23 @@
 workspace "MakefileGenerator"
-    platforms { "x64", "x86" }
     configurations {
         "Debug",
         "Release"
     }
     startproject "MakefileGenerator"
 
-outputdir = "/BIN/%{cfg.buildcfg}/%{cfg.architecture}/"
--- get current working directory
-cwd = os.getcwd()
+outputdir = "/BIN/%{cfg.toolset}/%{cfg.shortname}/%{prj.name}/"
+cwd = os.getcwd() -- get current working directory
+targetdir(cwd .. outputdir .. "bin")
+objdir(cwd .. outputdir .. "bin-int")
 
-targetdir(cwd .. outputdir .. "%{prj.name}/bin")
-objdir(cwd .. outputdir .. "%{prj.name}/bin-int")
+filter "system:windows"
+    platforms { "x64", "x86" }
+    defines "WINDOWS"
+filter "system:linux"
+    platforms "x64"
+    defines "LINUX"
+filter "system:macosx"
+    defines "MAC_OS"
 
 filter { "platforms:x64" }
     architecture "x64"
@@ -19,9 +25,6 @@ filter { "platforms:x64" }
 filter { "platforms:x86" }
     architecture "x86"
     defines "X86"
-
-filter "system:windows"
-    defines "WINDOWS"
 
 filter { "configurations:Debug" }
     runtime "Debug"
@@ -44,6 +47,6 @@ removeunreferencedcodedata "on"
 defines "USING_IMGUI"
 
 include "MakefileGenerator"
-include "Dependencies/glfw"
-include "Dependencies/imgui"
+include "Dependencies/GLFW"
+include "Dependencies/ImGui"
 include "Dependencies/nativefiledialog"

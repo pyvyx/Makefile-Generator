@@ -1,6 +1,7 @@
 project "ImGui"
     kind "StaticLib"
     language "C++"
+    cppdialect "C++17"
 
     files {
         "src/**.cpp",
@@ -9,5 +10,5 @@ project "ImGui"
 
     includedirs {
         "include/ImGui",
-        "../glfw/include"
+        "../GLFW/include"
     }

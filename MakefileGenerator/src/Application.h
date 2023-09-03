@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
+#include <cstdint>
 #include <functional>
 
 namespace App {
 
-    enum class WidgetColor : uint8_t {
+    enum class WidgetColor {
         RED, YELLOW, GREEN, NORMAL
     };
 
