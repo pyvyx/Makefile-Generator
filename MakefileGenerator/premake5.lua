@@ -10,14 +10,14 @@ project "MakefileGenerator"
     includedirs {
         "src",
         "vendor",
-        "../Dependencies/glfw/include",
-        "../Dependencies/imgui/include",
+        "../Dependencies/GLFW/include",
+        "../Dependencies/ImGui/include",
         "../Dependencies/nativefiledialog/include"
     }
 
     externalincludedirs {
         "vendor",
-        "../Dependencies/imgui/include"
+        "../Dependencies/ImGui/include"
     }
 
     flags "FatalWarnings"
@@ -35,6 +35,15 @@ project "MakefileGenerator"
             "shell32",
             "ole32",
             "uuid"
+        }
+
+    filter "system:linux"
+        links {
+            "GL",
+            "gtk-3",
+            "glib-2.0",
+            "gobject-2.0",
+            "X11"
         }
 
     filter "system:macosx"
@@ -78,12 +87,18 @@ project "MakefileGenerator"
             "unused-parameter",
             "format-security",
             "format-nonliteral",
-            "deprecated-copy-with-user-provided-dtor",
-            "deprecated-copy-with-user-provided-copy",
             "ignored-qualifiers",
             "sign-conversion",
             "missing-declarations"
         }
+
+
+    filter { "toolset:gcc* or toolset:clang*", "system:macosx" }
+            disablewarnings {
+                "deprecated-copy-with-user-provided-dtor",
+                "deprecated-copy-with-user-provided-copy"
+            }
+
 
     filter "toolset:gcc*"
         warnings "Extra"
@@ -108,6 +123,10 @@ project "MakefileGenerator"
             "array-bounds",
             "long-long",
             "implicit-fallthrough", 
+        }
+        disablewarnings {
+            "deprecated-copy-with-user-provided-dtor",
+            "deprecated-copy-with-user-provided-copy"
         }
     filter {}
 

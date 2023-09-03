@@ -41,7 +41,7 @@ namespace MG {
 	{
 		#ifdef _WIN32
 			return windows_case;
-		#elif defined linux || defined __APPLE__
+		#elif defined LINUX || defined __APPLE__
 			return linux_case;
 		#endif
 	}

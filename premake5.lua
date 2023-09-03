@@ -47,6 +47,6 @@ removeunreferencedcodedata "on"
 defines "USING_IMGUI"
 
 include "MakefileGenerator"
-include "Dependencies/glfw"
-include "Dependencies/imgui"
+include "Dependencies/GLFW"
+include "Dependencies/ImGui"
 include "Dependencies/nativefiledialog"
